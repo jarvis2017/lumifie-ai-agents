@@ -1,0 +1,10 @@
+# Third-party runtime dependencies. Install the shared `lumifie-core` separately:
+#   uv pip install -e ../lumifie-core
+# then:  uv pip install -r requirements.txt   (or: uv pip install -e ".[dev]")
+litellm>=1.80
+pydantic>=2.6
+fastapi>=0.110
+uvicorn>=0.30
+chromadb>=0.5
+loguru>=0.7
+tenacity>=8.2

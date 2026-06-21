@@ -1,0 +1,27 @@
+[
+  {
+    "id": "price",
+    "objection": "too expensive / over budget / price is high",
+    "rebuttal": "Frame around ROI and payback period, not sticker price. Offer a right-sized starter tier or pilot, and quantify the cost of the status quo."
+  },
+  {
+    "id": "incumbent",
+    "objection": "already use a competitor / have a solution",
+    "rebuttal": "Acknowledge the incumbent, then differentiate on the specific gap they feel. Propose a low-risk side-by-side trial rather than a rip-and-replace."
+  },
+  {
+    "id": "timing",
+    "objection": "not the right time / circle back next quarter / not a priority",
+    "rebuttal": "Respect the timing, anchor a concrete future touchpoint, and share a small piece of value now (benchmark, teardown) to stay top of mind."
+  },
+  {
+    "id": "no_need",
+    "objection": "don't see the need / not a priority",
+    "rebuttal": "Surface the cost of inaction with a relevant peer example, and ask a diagnostic question that reframes the problem in their terms."
+  },
+  {
+    "id": "trust",
+    "objection": "never heard of you / are you legit / security concerns",
+    "rebuttal": "Lead with proof: comparable customers, security posture, and a no-commitment way to verify (references, trial, documentation)."
+  }
+]

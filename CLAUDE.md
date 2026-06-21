@@ -143,16 +143,24 @@ lumifie-ai-agents/
 - **`competitive-intel-agent`** — researches competitors via web search, synthesizes
   positioning/pricing/threats, stores runs in SQLite, **diffs run-over-run**, emits
   an executive brief (Markdown + JSON). Cron wrapper for scheduled runs.
+- **`lead-research-agent`** — **LangGraph** pipeline of three sub-agents
+  (Scraper/Enricher via web search + Jina Reader → ICP Matcher → Copywriter) that
+  scores a target company against a configurable ICP and drafts personalized outreach.
+- **`inbound-triage-agent`** — **FastAPI** async webhook that classifies inbound
+  replies and routes them: **Chroma RAG** rebuttal for objections, booking link for
+  interested, contact extraction for wrong-person. `python main.py --mock-email` runs
+  fully offline via a built-in stub provider.
+- All agent READMEs follow the 10-section standard.
 - **CI** — GitHub Actions running ruff + pytest across all packages (green); badge
   in the root README.
 
 **Planned next:**
 
-- Migrate the two existing agent READMEs to the 10-section standard above.
 - Additional agents that map to recognizable client jobs (e.g. invoice/document
-  extraction, lead-research, support-ticket triage).
+  extraction, support-ticket triage, meeting-notes → CRM).
 - Optional: `uv` workspace for one-command monorepo installs; per-agent CI badges;
-  a `docs/` page describing the shared pattern in depth.
+  a `docs/` page describing the shared pattern in depth; move web-search/reader
+  backends into `lumifie_core` to de-duplicate across agents.
 
 ---
 

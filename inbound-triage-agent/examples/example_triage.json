@@ -1,0 +1,113 @@
+[
+  {
+    "message_id": "msg_interested_01",
+    "intent": "INTERESTED",
+    "confidence": 0.7,
+    "reasoning": "[offline stub] positive buying language detected",
+    "action": "booking",
+    "model": "stub:offline",
+    "rebuttal": null,
+    "booking": {
+      "link": "https://cal.com/lumifie/intro?ref=msg_interested_01",
+      "reply": "Great to hear from you Dana! Grab whatever time works best and we'll take it from there: https://cal.com/lumifie/intro?ref=msg_interested_01"
+    },
+    "contact": null,
+    "handled_at": "2026-06-21T04:53:57.374872Z",
+    "token_usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    }
+  },
+  {
+    "message_id": "msg_objection_01",
+    "intent": "OBJECTION",
+    "confidence": 0.7,
+    "reasoning": "[offline stub] objection language detected",
+    "action": "rebuttal",
+    "model": "stub:offline",
+    "rebuttal": {
+      "body": "Thanks for the candid reply \u2014 totally fair. A quick thought before you go: most teams in your position find the cost of the status quo outweighs the investment within a quarter. Open to a 15-minute look at the numbers?",
+      "key_points": [
+        "acknowledge the objection",
+        "reframe around ROI",
+        "low-commitment next step"
+      ],
+      "sources": [
+        "incumbent",
+        "no_need",
+        "trust"
+      ]
+    },
+    "booking": null,
+    "contact": null,
+    "handled_at": "2026-06-21T04:53:57.389845Z",
+    "token_usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    }
+  },
+  {
+    "message_id": "msg_wrongperson_01",
+    "intent": "NOT_THE_RIGHT_PERSON",
+    "confidence": 0.7,
+    "reasoning": "[offline stub] referral language detected",
+    "action": "extract_contact",
+    "model": "stub:offline",
+    "rebuttal": null,
+    "booking": null,
+    "contact": {
+      "referred_name": "Jordan Mills",
+      "referred_title": null,
+      "emails": [
+        "reception@vertexlabs.com",
+        "jordan.mills@vertexlabs.com"
+      ],
+      "phones": [
+        "415-555-0142"
+      ],
+      "note": "[offline stub] extracted via regex"
+    },
+    "handled_at": "2026-06-21T04:53:57.391722Z",
+    "token_usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    }
+  },
+  {
+    "message_id": "msg_ooo_01",
+    "intent": "OUT_OF_OFFICE",
+    "confidence": 0.7,
+    "reasoning": "[offline stub] auto-reply language detected",
+    "action": "snooze",
+    "model": "stub:offline",
+    "rebuttal": null,
+    "booking": null,
+    "contact": null,
+    "handled_at": "2026-06-21T04:53:57.392446Z",
+    "token_usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    }
+  },
+  {
+    "message_id": "msg_spam_01",
+    "intent": "SPAM",
+    "confidence": 0.7,
+    "reasoning": "[offline stub] spam markers detected",
+    "action": "drop",
+    "model": "stub:offline",
+    "rebuttal": null,
+    "booking": null,
+    "contact": null,
+    "handled_at": "2026-06-21T04:53:57.393188Z",
+    "token_usage": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0
+    }
+  }
+]

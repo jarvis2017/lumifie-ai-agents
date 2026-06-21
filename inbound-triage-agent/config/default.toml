@@ -1,0 +1,17 @@
+# Reference configuration for the Inbound Triage Agent.
+# Runtime values resolve from environment variables (see .env.example).
+
+[model]
+id = "claude"        # alias -> claude-opus-4-8; also gpt-4o, ollama/llama3.1
+max_tokens = 8000
+
+[routing]
+booking_base_url = "https://cal.com/lumifie/intro"
+rebuttal_top_k = 3
+
+[knowledge_base]
+# JSON objection->rebuttal playbook; unset uses the built-in default.
+path = "data/rebuttals.json"
+
+[intents]
+labels = ["INTERESTED", "OBJECTION", "NOT_THE_RIGHT_PERSON", "OUT_OF_OFFICE", "SPAM"]

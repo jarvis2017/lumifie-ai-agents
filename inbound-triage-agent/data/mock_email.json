@@ -1,0 +1,37 @@
+[
+  {
+    "id": "msg_interested_01",
+    "sender": "dana.kim@brightwave.io",
+    "sender_name": "Dana Kim",
+    "subject": "Re: cutting your reporting time",
+    "body": "This actually sounds interesting — we've been struggling with exactly this. I'd love to see a quick demo. Can you send a time to chat next week?"
+  },
+  {
+    "id": "msg_objection_01",
+    "sender": "marcus@nordpeak.com",
+    "sender_name": "Marcus Hale",
+    "subject": "Re: quick question",
+    "body": "Appreciate the note, but honestly this looks too expensive for where we are right now, and we already use a competitor for most of this. Not a priority this quarter."
+  },
+  {
+    "id": "msg_wrongperson_01",
+    "sender": "reception@vertexlabs.com",
+    "sender_name": "Priya Nair",
+    "subject": "Re: intro",
+    "body": "I'm not the right person for this. You should reach out to Jordan Mills, our Head of Operations, at jordan.mills@vertexlabs.com or call 415-555-0142."
+  },
+  {
+    "id": "msg_ooo_01",
+    "sender": "chris@summitanalytics.com",
+    "sender_name": "Chris Obi",
+    "subject": "Automatic reply: Re: intro",
+    "body": "I am currently out of office on annual leave and will return on the 30th. For urgent matters contact my colleague."
+  },
+  {
+    "id": "msg_spam_01",
+    "sender": "promo@deals-bonanza.biz",
+    "sender_name": null,
+    "subject": "You WON a crypto giveaway!!!",
+    "body": "Click here to win big! Unsubscribe anytime. Limited time crypto giveaway just for you!!!"
+  }
+]
