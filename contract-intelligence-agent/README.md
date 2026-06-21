@@ -1,137 +1,103 @@
 # Contract Intelligence Agent
 
-> Production-grade AI agent that reads a PDF contract, extracts and analyzes its
-> key clauses, flags risks with actionable recommendations, and produces both a
-> structured **JSON** report and a formatted **Markdown** summary.
+> Reads a PDF contract, extracts and analyzes the clauses that carry real risk,
+> and produces an executive risk report — in seconds, not hours.
 >
-> Built by **[Lumifie Consulting](https://github.com/jarvis2017/lumifie-ai-agents)** • MIT licensed
+> Built by **[Lumifie Consulting](https://github.com/jarvis2017/lumifie-ai-agents)** on [`lumifie-core`](../lumifie-core) • MIT licensed
 
-It focuses on the five clause families that drive most contract risk — **payment
-terms, termination, IP ownership, liability, and dispute resolution** — and rates
-each contract from a buyer's/counterparty's perspective.
+## The Business Problem
 
----
+Most small and mid-sized businesses sign contracts they haven't fully read. A
+master services agreement, an NDA, or a vendor contract can run 20+ pages of dense
+legal language, and the terms that actually hurt you — uncapped liability, an
+auto-renewal you forget to cancel, the other side being able to walk away on 30
+days' notice while you're locked in — are buried where a busy owner will never spot
+them. Paying a lawyer to review every contract costs $300–$800 a pop and takes days;
+skipping review means signing blind.
 
-## Why this is built the way it is
+The result is a quiet, recurring tax on the business: bad terms get accepted because
+nobody had the time or money to catch them, and the cost only shows up later — a
+renewal that auto-charged, an indemnity claim with no ceiling, an IP clause that gave
+away ownership of work you paid for.
 
-This is a real multi-step **agent**, not a single prompt:
+This agent gives you a first-pass legal review in under a minute. Hand it a PDF and
+it returns a plain-English summary, an overall risk rating, every key clause it
+found (quoted verbatim, with page numbers), and a ranked list of risks — each with a
+concrete recommendation for what to renegotiate before you sign. It doesn't replace
+your lawyer; it makes sure you (and your lawyer) spend time on the contracts and
+clauses that actually matter.
 
-- It walks the contract **page-aware, chunk-by-chunk** in one running
-  conversation, so analysis of later sections is informed by earlier ones and
-  large/multi-page PDFs never blow the context window.
-- On each chunk the model drives a **tool-execution loop** — it repeatedly calls
-  `record_clause` and `flag_risk` until it has nothing more to extract — then
-  calls `finalize_analysis` once at the end for an overall rating and summary.
-- The harness owns the loop, tool execution, logging, retries, and state; the
-  model owns the judgement. This is the standard manual agentic-loop pattern,
-  and it keeps the system debuggable and testable.
+## Who This Is For
 
-It uses the **Anthropic Python SDK** with **tool use** (strict schemas) for
-reliable structured extraction, **adaptive thinking** + configurable **effort**
-for legal-grade reasoning, **loguru** for logging, and **tenacity** for retry on
-transient API failures.
+- **Founders & small-business owners** signing vendor, client, or partnership agreements without in-house counsel
+- **Consultants, agencies & freelancers** reviewing MSAs and SOWs before every engagement
+- **Procurement & operations teams** triaging a queue of supplier contracts
+- **Paralegals & legal ops** wanting a fast first pass before attorney review
+- **Anyone** who needs to understand a contract's risk profile before a deadline
 
----
+## How It Works
 
-## Architecture
-
-```
-                 ┌──────────────┐
-   contract.pdf ─▶  pdf_loader  │  pypdf → pages → page-aware chunks
-                 └──────┬───────┘
-                        ▼
-                 ┌──────────────┐      tools.py (strict schemas)
-                 │    agent     │◀────  record_clause / flag_risk / finalize
-                 │  (loop)      │
-                 │              │──────▶ llm_client  ──▶  Anthropic Messages API
-                 │              │        (tenacity retry, adaptive thinking,
-                 └──────┬───────┘         effort, token accounting)
-                        ▼
-                 ┌──────────────┐
-                 │  models.py   │  Pydantic: Clause / Risk / ContractReport
-                 └──────┬───────┘
-                        ▼
-                 ┌──────────────┐
-                 │   report.py  │  → <name>.report.json
-                 └──────────────┘  → <name>.report.md
-```
-
-| Module | Responsibility |
-|---|---|
-| `pdf_loader.py` | Extract text per page; group pages into context-sized chunks (boundaries preserved for page citations). |
-| `tools.py` | Anthropic tool schemas (`strict: true`) mirroring the data models. |
-| `agent.py` | The multi-step loop: chunk feeding, tool execution, finalization, state. |
-| `llm_client.py` | Retrying wrapper around the Messages API; the single seam tests stub. |
-| `models.py` | Pydantic models — the source of truth for output shape. |
-| `report.py` | JSON serialization + executive Markdown rendering. |
-| `config.py` | Env-driven settings (model, effort, chunking, retries). |
-| `cli.py` | `contract-intelligence` command-line entry point. |
-
----
-
-## Install
-
-Requires **Python 3.12+**. Using [uv](https://github.com/astral-sh/uv):
-
-```bash
-cd contract-intelligence-agent
-uv venv --python 3.12
-uv pip install -e ".[dev]"      # dev extras add pytest, reportlab, ruff
+```mermaid
+flowchart TD
+    A[PDF contract] --> B[pdf_loader: extract text per page]
+    B --> C[Page-aware chunking<br/>boundaries preserved]
+    C --> D{Provider supports<br/>tool use?}
+    D -- "Claude / GPT-4o" --> E[Multi-step tool loop]
+    E --> E1[record_clause]
+    E --> E2[flag_risk]
+    E1 --> F[finalize_analysis]
+    E2 --> F
+    D -- "Ollama / local" --> G[JSON-mode extraction<br/>per chunk + synthesis]
+    F --> H[ContractReport<br/>Pydantic model]
+    G --> H
+    H --> I[report.py]
+    I --> J[(name.report.json)]
+    I --> K[(name.report.md)]
 ```
 
-Or with pip:
+The agent walks the contract one page-group at a time in a single running
+conversation, so later sections are analyzed in the context of earlier ones and
+large/multi-page PDFs never overflow the model's context window.
 
-```bash
-python3.12 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-pip install -e .
+## Agent Architecture
+
+| Module | Role | Inputs | Outputs | Tools / deps |
+|---|---|---|---|---|
+| `pdf_loader.py` | Extract text per page; group into context-sized chunks (page boundaries kept) | PDF path | `ContractDocument` (pages, chunks) | `pypdf` |
+| `agent.py` | Multi-step analysis loop; tool path + JSON fallback | `ContractDocument` | `ContractReport` | `lumifie_core.LLMProvider`, `BaseAgent` |
+| `tools.py` | Function-tool schemas + JSON-mode hints | — | tool defs | `lumifie_core.chat` |
+| `models.py` | Typed output models | tool inputs | `Clause`, `Risk`, `ContractReport` | `pydantic` |
+| `report.py` | Render JSON + executive Markdown | `ContractReport` | `.json`, `.md` strings | — |
+| `config.py` | Settings (model, chunking, retries) | env / flags | `ContractSettings` | `lumifie_core.CoreSettings` |
+| `cli.py` | Entry point; orchestration | CLI args | report files | `lumifie_core` |
+
+**Tools the model is given:** `record_clause`, `flag_risk`, `finalize_analysis`
+(native function calling on Claude/GPT-4o; JSON-mode structured extraction on Ollama).
+
+## Example Output
+
+**JSON** (`examples/sample_contract.report.json`, abridged):
+
+```json
+{
+  "contract_name": "sample_contract.pdf",
+  "overall_risk_level": "high",
+  "executive_summary": "This Master Services Agreement is materially vendor-favorable...",
+  "risks": [
+    {
+      "severity": "critical",
+      "category": "liability",
+      "title": "Uncapped client indemnification",
+      "recommendation": "Cap total indemnity at fees paid in the trailing 12 months and make the carve-out mutual; require Provider indemnity for IP infringement."
+    }
+  ],
+  "clauses": [
+    { "category": "payment_terms", "title": "Net-15 payment, non-refundable", "page": 1 }
+  ]
+}
 ```
 
-## Configure
-
-```bash
-cp .env.example .env
-# edit .env and set ANTHROPIC_API_KEY=sk-ant-...
-set -a; . ./.env; set +a       # load it into your shell
-```
-
-All settings have sane defaults and can be overridden via environment variables
-(see `.env.example`) or CLI flags.
-
-## Run
-
-```bash
-# Generate the bundled sample contract (or bring your own PDF)
-python scripts/make_sample_pdf.py examples/sample_contract.pdf
-
-# Analyze it
-contract-intelligence examples/sample_contract.pdf --out-dir ./reports --print
-```
-
-This writes `reports/sample_contract.report.json` and
-`reports/sample_contract.report.md`.
-
-```
-usage: contract-intelligence [-h] [-o OUT_DIR] [--model MODEL]
-                             [--effort {low,medium,high,max}] [--print]
-                             [--log-level LOG_LEVEL] [--version]
-                             pdf
-```
-
-You can also run it as a module: `python -m contract_intelligence <pdf>`.
-
----
-
-## Example output
-
-See [`examples/`](examples/) for a full sample run against the bundled
-[`sample_contract.pdf`](examples/sample_contract.pdf) — a deliberately
-vendor-favorable Master Services Agreement:
-
-- [`sample_contract.report.json`](examples/sample_contract.report.json) — machine-readable
-- [`sample_contract.report.md`](examples/sample_contract.report.md) — human-readable
-
-Markdown excerpt:
+**Markdown summary** (`examples/sample_contract.report.md`, excerpt):
 
 ```markdown
 # Contract Analysis — sample_contract.pdf
@@ -139,87 +105,119 @@ Markdown excerpt:
 **Overall risk:** 🟠 High
 **Pages analyzed:** 3
 
-## Executive Summary
-
-This Master Services Agreement is materially vendor-favorable. The client bears
-unlimited, uncapped indemnification while the provider may terminate for
-convenience on 30 days' notice; IP assignment, auto-renewal, and a jury-trial
-waiver compound the exposure. Recommend negotiating a liability cap and
-mutual termination rights before signing.
-
 ## Risk Register
 _5 risk(s) identified: 1 critical, 2 high, 2 medium._
 
 ### 1. 🔴 Critical — Uncapped client indemnification
 *Category: Liability*
 
-Section 5.2 makes the client's indemnification obligations explicitly unlimited
-and carves them out of the mutual limitation-of-liability cap...
+Section 5.2 makes the client's indemnity explicitly unlimited and carves it out of
+the mutual limitation-of-liability cap...
 
-**Recommendation:** Cap total indemnity at fees paid in the trailing 12 months
-and make the carve-out mutual.
+**Recommendation:** Cap total indemnity at fees paid in the trailing 12 months and
+make the carve-out mutual.
 ```
 
----
+## Technical Stack
 
-## How extraction works (the agent loop)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)
+![litellm](https://img.shields.io/badge/LLM-litellm-2E8B57)
+![Claude](https://img.shields.io/badge/default-claude--opus--4--8-D97757)
+![Pydantic](https://img.shields.io/badge/Pydantic-2.x-E92063)
+![Ruff](https://img.shields.io/badge/lint-ruff-261230?logo=ruff&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-1. **Load & chunk** — `pdf_loader` extracts text per page and groups pages into
-   chunks of `~max_chunk_chars`, labeling each with `[Page N]` so the model can
-   cite pages. A single oversized page is never truncated.
-2. **Per-chunk extraction** — for each chunk the agent sends the section and runs
-   a tool loop: the model emits `record_clause` / `flag_risk` calls, the harness
-   validates each against the Pydantic models and records it, and returns
-   tool results until the model is done with that section.
-3. **Finalize** — after the last chunk, the agent asks for `finalize_analysis`,
-   yielding the overall risk level and executive summary.
-4. **Render** — state is assembled into a `ContractReport` and written as JSON
-   and Markdown. Token usage is accumulated across every call for cost visibility.
+| Layer | Choice |
+|---|---|
+| Language | Python 3.12+ |
+| Shared foundation | `lumifie-core` (provider, logging, retries, base agent) |
+| LLM access | litellm — Claude, OpenAI, Ollama |
+| Default model | `claude-opus-4-8` |
+| PDF parsing | `pypdf` |
+| Data models | Pydantic 2 |
+| Logging / retries | loguru / tenacity |
+| Vector DB | none (not needed) |
+| Tests / lint | pytest / ruff |
 
-Model behavior is tuned for legal review: `thinking={"type": "adaptive"}` with
-`effort` (default `high`, raise to `max` for high-stakes deals).
+## Setup & Usage
 
----
-
-## Testing
-
-The agent's only external dependency (the LLM) is injected, so the **entire
-pipeline runs in tests with no API key and no network** via a deterministic
-scripted client — exercising chunking, the multi-step loop, finalization, and
-rendering exactly as the live path does.
+You need Python 3.12+ and [uv](https://github.com/astral-sh/uv).
 
 ```bash
-pytest                 # full suite
-pytest --cov=contract_intelligence --cov-report=term-missing
-ruff check .
+# 1. From the repo root, install the shared core (once):
+uv pip install -e ./lumifie-core
+
+# 2. Set up this agent:
+cd contract-intelligence-agent
+uv venv --python 3.12
+uv pip install -e ".[dev]"
+
+# 3. Add your API key:
+cp .env.example .env          # edit .env, set ANTHROPIC_API_KEY=sk-ant-...
+set -a; . ./.env; set +a      # load it into your shell
+
+# 4. Generate the sample contract (or bring your own PDF), then analyze it:
+python scripts/make_sample_pdf.py examples/sample_contract.pdf
+contract-intelligence examples/sample_contract.pdf --out-dir ./reports --print
 ```
 
----
+This writes `reports/sample_contract.report.json` and `.report.md`.
 
-## Configuration reference
+```
+contract-intelligence <pdf> [--out-dir DIR] [--model claude|gpt-4o|ollama/llama3.1]
+                            [--reasoning-effort low|medium|high] [--print]
+```
 
-| Env var | Default | Meaning |
+Run the offline test suite (no API key needed): `pytest`
+
+## Configuration
+
+All settings are environment variables (see `.env.example`); CLI flags override them.
+
+| Variable | Description | Default |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | — | **Required** for live runs. |
-| `CONTRACT_AGENT_MODEL` | `claude-opus-4-8` | Claude model id. |
-| `CONTRACT_AGENT_EFFORT` | `high` | Reasoning effort: `low`/`medium`/`high`/`max`. |
-| `CONTRACT_AGENT_MAX_TOKENS` | `8000` | Per-response output cap. |
-| `CONTRACT_AGENT_MAX_CHUNK_CHARS` | `12000` | Approx. chars per chunk. |
-| `CONTRACT_AGENT_MAX_ITERS` | `8` | Max tool iterations per chunk. |
-| `CONTRACT_AGENT_MAX_RETRIES` | `4` | tenacity retry attempts on transient errors. |
-| `CONTRACT_AGENT_LOG_LEVEL` | `INFO` | loguru level. |
+| `LITELLM_MODEL` | Model alias/id: `claude`, `gpt-4o`, `ollama/llama3.1`, … | `claude` |
+| `ANTHROPIC_API_KEY` | Required for Claude models | — |
+| `OPENAI_API_KEY` | Required for GPT models | — |
+| `OLLAMA_API_BASE` | Ollama endpoint (local models) | `http://localhost:11434` |
+| `LUMIFIE_MAX_TOKENS` | Max output tokens per call | `8000` |
+| `LUMIFIE_TEMPERATURE` | Sampling temperature (only sent if set) | unset |
+| `LUMIFIE_REASONING_EFFORT` | `low`/`medium`/`high` (only if supported) | unset |
+| `LUMIFIE_MAX_RETRIES` | Retry attempts on transient API errors | `4` |
+| `LUMIFIE_REQUEST_TIMEOUT` | Per-request timeout (seconds) | `600` |
+| `LUMIFIE_LOG_LEVEL` | `DEBUG`/`INFO`/`WARNING`/`ERROR` | `INFO` |
+| `CONTRACT_AGENT_MAX_CHUNK_CHARS` | Approx. characters per chunk | `12000` |
+| `CONTRACT_AGENT_MAX_ITERS` | Max tool iterations per chunk | `8` |
+
+## Supported Models
+
+| Capability | Claude (`claude-opus-4-8`) | OpenAI (`gpt-4o`) | Ollama (`ollama/*`) |
+|---|---|---|---|
+| Clause extraction | ✅ Full (tool use) | ✅ Full (tool use) | 🟡 Partial (JSON mode) |
+| Risk flagging | ✅ Full | ✅ Full | 🟡 Partial |
+| Multi-step loop | ✅ Full | ✅ Full | 🟡 Single-pass per chunk |
+| Page-aware chunking | ✅ Full | ✅ Full | ✅ Full |
+| Reasoning effort | ✅ Full | 🟡 Partial | ⚪ Experimental |
+
+**Full** = native tool use; **Partial** = JSON-mode fallback with a logged warning;
+**Experimental** = works but unverified across model versions.
+
+## Limitations & Roadmap
+
+**Limitations**
+
+- **No OCR.** Scanned-image PDFs with no text layer are rejected with a clear error.
+- **Not legal advice.** This is a first-pass aid, not a substitute for an attorney.
+- Analysis quality tracks the chosen model; local models give a lighter review.
+
+**Roadmap**
+
+- Redline-style suggested edits for each flagged clause.
+- A reusable clause/risk knowledge base for consistent scoring across contracts.
+- Batch mode for reviewing a folder of contracts with a portfolio risk summary.
+- Optional citation back to exact character offsets in the source PDF.
 
 ---
 
-## Limitations
-
-- **No OCR.** Scanned-image PDFs with no text layer are rejected with a clear
-  error rather than silently returning nothing.
-- **Not legal advice.** Output is an informational aid for review, not a
-  substitute for a qualified attorney.
-
----
-
-## License
-
-MIT © 2026 Lumifie Consulting. See [LICENSE](LICENSE).
+MIT © 2026 Lumifie Consulting.

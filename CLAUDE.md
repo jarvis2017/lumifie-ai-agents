@@ -59,18 +59,26 @@ pay for** (e.g. "review this contract for risks", "watch my competitors").
 
 ## README Standard
 
-Every **agent** README follows this **exact 10-section structure**, in order:
+Every **agent** README follows this **exact 10-section structure**, in order.
+Use `contract-intelligence-agent/README.md` as the canonical reference.
 
-1. **Business Problem** — the real-world pain this solves.
-2. **Who This Is For** — the buyer/persona.
-3. **How It Works** — a **Mermaid** diagram of the flow.
-4. **Agent Architecture** — modules and responsibilities.
-5. **Example Output** — a real excerpt (link to `examples/`).
-6. **Technical Stack** — languages, libraries, models.
-7. **Setup & Usage** — install + run commands.
-8. **Configuration** — env vars / flags table.
-9. **Supported Models** — claude / gpt-4o / ollama, with tool-use vs fallback.
-10. **Limitations & Roadmap** — honest constraints and what's next.
+1. **The Business Problem** — 2-3 paragraphs for a non-technical business owner:
+   the pain point and what it costs in time/money. No jargon, no code.
+2. **Who This Is For** — bullet list of specific roles/industries served.
+3. **How It Works** — a **Mermaid.js flowchart** of the full pipeline from input
+   to output, **accurate to the actual code**.
+4. **Agent Architecture** — a table listing each agent/module, its role, inputs,
+   outputs, and tools it uses.
+5. **Example Output** — real representative output (a JSON snippet **and** a
+   Markdown summary), not placeholder text.
+6. **Technical Stack** — shields.io badges **and** a table (Language, Framework,
+   LLM provider, vector DB if used, etc.).
+7. **Setup & Usage** — step by step, assuming zero prior knowledge.
+8. **Configuration** — full `.env` reference table with a description and default
+   for **every** variable.
+9. **Supported Models** — a table showing Claude / GPT-4o / Ollama support level
+   (Full / Partial / Experimental) **per feature**.
+10. **Limitations & Roadmap** — honest about what it can't do yet and what's next.
 
 The root README is the **portfolio index** (agent table + shared pattern), not an
 agent README, so it does not follow the 10-section structure.
