@@ -1,0 +1,34 @@
+# Reference configuration for the Contract Intelligence Agent.
+#
+# These values document the agent's defaults and the analytical scope. Runtime
+# settings are resolved from environment variables (see .env.example and
+# src/contract_intelligence/config.py); this file is the human-readable spec the
+# defaults are kept in sync with.
+
+[model]
+# Default model. Use the latest, most capable Claude model for legal reasoning.
+id = "claude-opus-4-8"
+effort = "high"          # low | medium | high | max
+max_tokens = 8000
+
+[chunking]
+# Page-aware chunking keeps page boundaries intact so clauses can cite pages.
+max_chunk_chars = 12000
+
+[loop]
+max_iterations_per_chunk = 8
+
+[retry]
+# tenacity exponential backoff on transient API failures (429 / 5xx / network).
+max_retries = 4
+
+# Clause categories the agent extracts, in priority order.
+[scope]
+clause_categories = [
+    "payment_terms",
+    "termination",
+    "ip_ownership",
+    "liability",
+    "dispute_resolution",
+]
+risk_levels = ["low", "medium", "high", "critical"]

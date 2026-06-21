@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual envs / uv
+.venv/
+venv/
+.python-version
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Generated reports (keep examples/ committed)
+reports/
+*.report.json
+*.report.md
+!examples/*.report.json
+!examples/*.report.md
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

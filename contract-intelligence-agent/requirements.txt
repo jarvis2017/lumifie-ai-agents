@@ -1,0 +1,8 @@
+# Runtime dependencies for the Contract Intelligence Agent.
+# For development extras (pytest, reportlab, ruff) install the package with:
+#   uv pip install -e ".[dev]"
+anthropic>=0.40
+pydantic>=2.6
+pypdf>=4.2
+loguru>=0.7
+tenacity>=8.2
