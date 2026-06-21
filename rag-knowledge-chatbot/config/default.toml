@@ -1,0 +1,23 @@
+# Reference configuration for the RAG Knowledge Chatbot.
+# Runtime values resolve from environment variables (see .env.example).
+
+[model]
+id = "claude"        # alias -> claude-opus-4-8; also gpt-4o, ollama/llama3.1
+max_tokens = 8000
+
+[store]
+db_path = "./chroma_rag"   # Chroma PersistentClient directory
+collection = "documents"
+
+[ingestion]
+chunk_size = 1000     # characters per chunk
+chunk_overlap = 150   # character overlap between consecutive chunks
+# Supported inputs: .pdf, .docx, .md, .txt, and http(s) URLs.
+
+[retrieval]
+top_k = 4             # chunks retrieved per question
+
+[embedding]
+# auto -> try sentence-transformers, fall back to the offline hashing backend.
+backend = "auto"      # auto | sentence-transformers | hashing
+st_model = "all-MiniLM-L6-v2"   # requires the [st] extra
