@@ -1,0 +1,241 @@
+{
+  "pipeline_id": "demo-pipeline",
+  "generated_at": "2026-06-21T15:05:24.662350Z",
+  "model": "stub:offline",
+  "dry_run": false,
+  "leads": [
+    {
+      "id": "lead-1",
+      "company": "Acme Analytics",
+      "domain": "acme-analytics.com",
+      "contact_name": "Jane Doe",
+      "contact_email": "jane@acme-analytics.com",
+      "title": "VP Engineering",
+      "source_url": "https://acme-analytics.com",
+      "signals": [
+        "Series B raise",
+        "hiring engineers"
+      ],
+      "icp_fit": 88,
+      "tier": "A",
+      "reasoning": "Mid-market B2B SaaS, VP Eng persona, scaling fast — strong ICP fit.",
+      "rank": 1,
+      "stage": "qualified"
+    },
+    {
+      "id": "lead-2",
+      "company": "Globex Data",
+      "domain": "globexdata.io",
+      "contact_name": "Sam Lee",
+      "contact_email": "sam@globexdata.io",
+      "title": "Head of Product",
+      "source_url": "https://globexdata.io",
+      "signals": [
+        "manual reporting workflows"
+      ],
+      "icp_fit": 74,
+      "tier": "B",
+      "reasoning": "Right size and persona; pain around manual workflows.",
+      "rank": 2,
+      "stage": "replied"
+    },
+    {
+      "id": "lead-3",
+      "company": "Initech Cloud",
+      "domain": "initech.cloud",
+      "contact_name": null,
+      "contact_email": "ops@initech.cloud",
+      "title": null,
+      "source_url": "https://initech.cloud",
+      "signals": [
+        "legacy tooling"
+      ],
+      "icp_fit": 61,
+      "tier": "C",
+      "reasoning": "Plausible fit but unclear persona and budget.",
+      "rank": 3,
+      "stage": "contacted"
+    }
+  ],
+  "sequences": [
+    {
+      "lead_id": "lead-1",
+      "steps": [
+        {
+          "channel": "email",
+          "day": 0,
+          "subject": "A quick idea for your team",
+          "body": "Hi {first} — saw your recent momentum. Teams like yours often hit a wall where manual workflows stop scaling with headcount; we automate exactly that, with fast time-to-value. Worth a 15-minute look?"
+        },
+        {
+          "channel": "linkedin",
+          "day": 2,
+          "subject": null,
+          "body": "Following up with a short note — happy to share a quick teardown relevant to your stack."
+        }
+      ],
+      "personalization_signals": [
+        "recent growth",
+        "manual workflows"
+      ]
+    },
+    {
+      "lead_id": "lead-2",
+      "steps": [
+        {
+          "channel": "email",
+          "day": 0,
+          "subject": "A quick idea for your team",
+          "body": "Hi {first} — saw your recent momentum. Teams like yours often hit a wall where manual workflows stop scaling with headcount; we automate exactly that, with fast time-to-value. Worth a 15-minute look?"
+        },
+        {
+          "channel": "linkedin",
+          "day": 2,
+          "subject": null,
+          "body": "Following up with a short note — happy to share a quick teardown relevant to your stack."
+        }
+      ],
+      "personalization_signals": [
+        "recent growth",
+        "manual workflows"
+      ]
+    },
+    {
+      "lead_id": "lead-3",
+      "steps": [
+        {
+          "channel": "email",
+          "day": 0,
+          "subject": "A quick idea for your team",
+          "body": "Hi {first} — saw your recent momentum. Teams like yours often hit a wall where manual workflows stop scaling with headcount; we automate exactly that, with fast time-to-value. Worth a 15-minute look?"
+        },
+        {
+          "channel": "linkedin",
+          "day": 2,
+          "subject": null,
+          "body": "Following up with a short note — happy to share a quick teardown relevant to your stack."
+        }
+      ],
+      "personalization_signals": [
+        "recent growth",
+        "manual workflows"
+      ]
+    }
+  ],
+  "replies": [
+    {
+      "lead_id": "lead-1",
+      "from_email": "jane@acme-analytics.com",
+      "subject": "Re: A quick idea for your team",
+      "body": "This is interesting — I'd love a quick demo. Can you send a time next week?",
+      "intent": "interested",
+      "suggested_action": "Send a booking link and confirm a time."
+    },
+    {
+      "lead_id": "lead-2",
+      "from_email": "sam@globexdata.io",
+      "subject": "Re: A quick idea for your team",
+      "body": "Honestly this looks too expensive and we already use a competitor right now.",
+      "intent": "objection",
+      "suggested_action": "Acknowledge cost, reframe on ROI, offer a pilot."
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "out-lead-1",
+      "type": "start_outreach",
+      "lead_id": "lead-1",
+      "decision": "executed",
+      "detail": "sent step 1 to jane@acme-analytics.com",
+      "ok": true
+    },
+    {
+      "action_id": "out-lead-2",
+      "type": "start_outreach",
+      "lead_id": "lead-2",
+      "decision": "executed",
+      "detail": "sent step 1 to sam@globexdata.io",
+      "ok": true
+    },
+    {
+      "action_id": "out-lead-3",
+      "type": "start_outreach",
+      "lead_id": "lead-3",
+      "decision": "executed",
+      "detail": "sent step 1 to ops@initech.cloud",
+      "ok": true
+    },
+    {
+      "action_id": "reply-lead-1",
+      "type": "send_reply",
+      "lead_id": "lead-1",
+      "decision": "executed",
+      "detail": "replied to jane@acme-analytics.com",
+      "ok": true
+    },
+    {
+      "action_id": "reply-lead-2",
+      "type": "send_reply",
+      "lead_id": "lead-2",
+      "decision": "executed",
+      "detail": "replied to sam@globexdata.io",
+      "ok": true
+    },
+    {
+      "action_id": "crm-lead-1",
+      "type": "crm_update",
+      "lead_id": "lead-1",
+      "decision": "executed",
+      "detail": "crm upsert Acme Analytics -> qualified",
+      "ok": true
+    },
+    {
+      "action_id": "crm-lead-2",
+      "type": "crm_update",
+      "lead_id": "lead-2",
+      "decision": "executed",
+      "detail": "crm upsert Globex Data -> replied",
+      "ok": true
+    },
+    {
+      "action_id": "crm-lead-3",
+      "type": "crm_update",
+      "lead_id": "lead-3",
+      "decision": "executed",
+      "detail": "crm upsert Initech Cloud -> contacted",
+      "ok": true
+    }
+  ],
+  "report": {
+    "pipeline_id": "demo-pipeline",
+    "generated_at": "2026-06-21T15:05:24.656170Z",
+    "metrics": {
+      "leads_prospected": 3,
+      "sequences_drafted": 3,
+      "replies_processed": 2,
+      "actions_proposed": 8,
+      "actions_executed": 8,
+      "by_stage": {
+        "qualified": 1,
+        "replied": 1,
+        "contacted": 1
+      },
+      "by_reply_intent": {
+        "interested": 1,
+        "objection": 1
+      }
+    },
+    "stale_deals": [],
+    "recommended_next_actions": [
+      "Prioritize the A-tier lead for a same-day personalized follow-up.",
+      "Send the prepared rebuttal to the pricing objection and offer a pilot.",
+      "Book the interested reply before momentum fades."
+    ],
+    "summary": "Healthy top of funnel: strong A-tier lead identified, sequences drafted, and two replies triaged. One interested prospect is ready to book; one objection needs a rebuttal."
+  },
+  "token_usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0
+  }
+}

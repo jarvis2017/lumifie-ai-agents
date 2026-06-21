@@ -1,0 +1,30 @@
+# Sales-Ops Multi-Agent configuration.
+# Non-technical operators can tune everything here without touching code.
+
+# Who we sell to — the Prospector scores leads against this and the Reporter
+# tailors recommendations to it.
+icp:
+  industries: ["B2B SaaS", "developer tools", "fintech"]
+  company_sizes: ["50-200 employees", "200-1000 employees"]
+  personas: ["VP Engineering", "Head of Product", "CTO"]
+  keywords: ["manual workflows", "scaling", "automation"]
+  disqualifiers: ["pre-revenue", "fewer than 10 employees", "consumer-only"]
+  value_props: ["fast time-to-value", "automation of repetitive work", "integrates with your stack"]
+
+# Human approval gate for EVERY external action (email send, CRM write, reply).
+approval:
+  channel: cli            # cli (prompt) | auto (no prompt) | deny (block all) | telegram
+  telegram_chat_id: ""    # for channel=telegram; bot token comes from TELEGRAM_BOT_TOKEN env
+
+# Where CRM Sync writes. Credentials come from env (see .env.example).
+crm:
+  provider: none          # none | hubspot | airtable
+
+# Outreach style for the Outreach sub-agent.
+outreach:
+  tone: "concise, friendly, specific; no fluff"
+  num_steps: 2
+  channels: ["email", "linkedin"]
+
+max_leads: 5              # how many ranked leads to work per run
+stale_after_days: 14     # a lead untouched longer than this is flagged stale
