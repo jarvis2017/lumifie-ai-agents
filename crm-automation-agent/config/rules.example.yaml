@@ -1,0 +1,82 @@
+# ============================================================================
+# CRM Automation rules
+# ----------------------------------------------------------------------------
+# This file controls what the agent watches for and what it does in response.
+# You can edit it WITHOUT touching any code. Each rule has:
+#
+#   name        : a label you'll recognise (shows up in the audit log)
+#   enabled     : true to use the rule, false to switch it off
+#   description : a plain-English note for your team
+#   trigger     : the condition to watch for, plus its settings (params)
+#   action      : what to do when the trigger fires, plus its settings (params)
+#
+# Trigger types (and their params):
+#   new_lead          - a contact/deal created recently.   params: within_days
+#   deal_stale        - a deal with no activity for a while. params: days
+#   follow_up_overdue - a deal whose follow-up date is past. (no params)
+#   missing_fields    - a contact missing required fields.   params: required_fields
+#
+# Action types (and their params):
+#   draft_follow_up_email - AI drafts an email for you to review (NEVER auto-sent)
+#                           params: intent (optional tone hint)
+#   update_deal_stage     - moves a deal to a new stage (asks for your approval)
+#                           params: stage
+#   create_task           - creates a follow-up task (asks for your approval)
+#                           params: subject, due_in_days
+#   flag_for_review       - just flags the record for a human (no external change)
+#                           params: reason (optional)
+#
+# IMPORTANT: update_deal_stage and create_task change your CRM, so the agent
+# asks you to approve each one (unless you pass --yes or --dry-run). Email drafts
+# and flags never change anything externally — they are queued for your review.
+# ============================================================================
+
+rules:
+  - name: "Welcome new leads"
+    enabled: true
+    description: "Draft a warm intro email when a new contact or deal appears."
+    trigger:
+      type: new_lead
+      params:
+        within_days: 1          # treat anything created in the last day as new
+    action:
+      type: draft_follow_up_email
+      params:
+        intent: "introduce yourself and offer to help"
+
+  - name: "Re-engage stale deals"
+    enabled: true
+    description: "Draft a check-in email for deals that have gone quiet."
+    trigger:
+      type: deal_stale
+      params:
+        days: 30                # no activity for more than 30 days = stale
+    action:
+      type: draft_follow_up_email
+      params:
+        intent: "gently re-open the conversation"
+
+  - name: "Task on overdue follow-ups"
+    enabled: true
+    description: "Create a task for the deal owner when a follow-up date has passed."
+    trigger:
+      type: follow_up_overdue
+    action:
+      type: create_task         # external action -> requires your approval
+      params:
+        subject: "Overdue follow-up — reach out today"
+        due_in_days: 1
+
+  - name: "Flag contacts missing key details"
+    enabled: true
+    description: "Flag contacts that are missing the info your team needs."
+    trigger:
+      type: missing_fields
+      params:
+        required_fields:        # a field counts as missing if absent or empty
+          - company
+          - phone
+    action:
+      type: flag_for_review
+      params:
+        reason: "Contact record is incomplete — add the missing details."

@@ -1,0 +1,236 @@
+{
+  "source": "demo",
+  "model": "stub:offline",
+  "started_at": "2026-06-21T14:03:02.654863Z",
+  "dry_run": true,
+  "contacts_scanned": 3,
+  "deals_scanned": 4,
+  "triggers": [
+    {
+      "type": "new_lead",
+      "target_id": "c-1001",
+      "detail": "New contact: Dana Okoro",
+      "context": {
+        "kind": "contact",
+        "name": "Dana Okoro",
+        "email": "dana@brightpath.io"
+      }
+    },
+    {
+      "type": "new_lead",
+      "target_id": "d-2003",
+      "detail": "New deal: Nimbus Labs \u2014 Pilot",
+      "context": {
+        "kind": "deal",
+        "name": "Nimbus Labs \u2014 Pilot",
+        "stage": "Qualification"
+      }
+    },
+    {
+      "type": "deal_stale",
+      "target_id": "d-2001",
+      "detail": "Deal 'BrightPath \u2014 Platform license' has had no activity for 40 days.",
+      "context": {
+        "name": "BrightPath \u2014 Platform license",
+        "stage": "Proposal Sent",
+        "days_stale": 40,
+        "owner": "Joe Stanton"
+      }
+    },
+    {
+      "type": "follow_up_overdue",
+      "target_id": "d-2002",
+      "detail": "Follow-up for 'Vantage \u2014 Annual renewal' is 4 day(s) overdue.",
+      "context": {
+        "name": "Vantage \u2014 Annual renewal",
+        "stage": "Negotiation",
+        "days_overdue": 4,
+        "due": "2026-06-17"
+      }
+    },
+    {
+      "type": "missing_fields",
+      "target_id": "c-1001",
+      "detail": "Dana Okoro is missing: company, phone.",
+      "context": {
+        "name": "Dana Okoro",
+        "missing": [
+          "company",
+          "phone"
+        ]
+      }
+    },
+    {
+      "type": "missing_fields",
+      "target_id": "c-1003",
+      "detail": "Priya Nair is missing: phone.",
+      "context": {
+        "name": "Priya Nair",
+        "missing": [
+          "phone"
+        ]
+      }
+    }
+  ],
+  "proposed": [
+    {
+      "type": "draft_follow_up_email",
+      "target_id": "c-1001",
+      "params": {
+        "intent": "introduce yourself and offer to help",
+        "trigger_detail": "New contact: Dana Okoro"
+      },
+      "rule_name": "Welcome new leads",
+      "rationale": "Rule 'Welcome new leads' matched new_lead: New contact: Dana Okoro",
+      "trigger_type": "new_lead"
+    },
+    {
+      "type": "draft_follow_up_email",
+      "target_id": "d-2003",
+      "params": {
+        "intent": "introduce yourself and offer to help",
+        "trigger_detail": "New deal: Nimbus Labs \u2014 Pilot"
+      },
+      "rule_name": "Welcome new leads",
+      "rationale": "Rule 'Welcome new leads' matched new_lead: New deal: Nimbus Labs \u2014 Pilot",
+      "trigger_type": "new_lead"
+    },
+    {
+      "type": "draft_follow_up_email",
+      "target_id": "d-2001",
+      "params": {
+        "intent": "gently re-open the conversation",
+        "trigger_detail": "Deal 'BrightPath \u2014 Platform license' has had no activity for 40 days."
+      },
+      "rule_name": "Re-engage stale deals",
+      "rationale": "Rule 'Re-engage stale deals' matched deal_stale: Deal 'BrightPath \u2014 Platform license' has had no activity for 40 days.",
+      "trigger_type": "deal_stale"
+    },
+    {
+      "type": "create_task",
+      "target_id": "d-2002",
+      "params": {
+        "subject": "Overdue follow-up \u2014 reach out today",
+        "due_in_days": 1,
+        "trigger_detail": "Follow-up for 'Vantage \u2014 Annual renewal' is 4 day(s) overdue."
+      },
+      "rule_name": "Task on overdue follow-ups",
+      "rationale": "Rule 'Task on overdue follow-ups' matched follow_up_overdue: Follow-up for 'Vantage \u2014 Annual renewal' is 4 day(s) overdue.",
+      "trigger_type": "follow_up_overdue"
+    },
+    {
+      "type": "flag_for_review",
+      "target_id": "c-1001",
+      "params": {
+        "reason": "Contact record is incomplete \u2014 add the missing details.",
+        "trigger_detail": "Dana Okoro is missing: company, phone."
+      },
+      "rule_name": "Flag contacts missing key details",
+      "rationale": "Rule 'Flag contacts missing key details' matched missing_fields: Dana Okoro is missing: company, phone.",
+      "trigger_type": "missing_fields"
+    },
+    {
+      "type": "flag_for_review",
+      "target_id": "c-1003",
+      "params": {
+        "reason": "Contact record is incomplete \u2014 add the missing details.",
+        "trigger_detail": "Priya Nair is missing: phone."
+      },
+      "rule_name": "Flag contacts missing key details",
+      "rationale": "Rule 'Flag contacts missing key details' matched missing_fields: Priya Nair is missing: phone.",
+      "trigger_type": "missing_fields"
+    }
+  ],
+  "audit": [
+    {
+      "id": 1,
+      "timestamp": "2026-06-21T14:03:02.654908Z",
+      "rule_name": "Welcome new leads",
+      "trigger_type": "new_lead",
+      "action_type": "draft_follow_up_email",
+      "target_id": "c-1001",
+      "params": {
+        "intent": "introduce yourself and offer to help",
+        "trigger_detail": "New contact: Dana Okoro"
+      },
+      "decision": "proposed",
+      "result": "Dry run: proposed only, not executed."
+    },
+    {
+      "id": 2,
+      "timestamp": "2026-06-21T14:03:02.654932Z",
+      "rule_name": "Welcome new leads",
+      "trigger_type": "new_lead",
+      "action_type": "draft_follow_up_email",
+      "target_id": "d-2003",
+      "params": {
+        "intent": "introduce yourself and offer to help",
+        "trigger_detail": "New deal: Nimbus Labs \u2014 Pilot"
+      },
+      "decision": "proposed",
+      "result": "Dry run: proposed only, not executed."
+    },
+    {
+      "id": 3,
+      "timestamp": "2026-06-21T14:03:02.654944Z",
+      "rule_name": "Re-engage stale deals",
+      "trigger_type": "deal_stale",
+      "action_type": "draft_follow_up_email",
+      "target_id": "d-2001",
+      "params": {
+        "intent": "gently re-open the conversation",
+        "trigger_detail": "Deal 'BrightPath \u2014 Platform license' has had no activity for 40 days."
+      },
+      "decision": "proposed",
+      "result": "Dry run: proposed only, not executed."
+    },
+    {
+      "id": 4,
+      "timestamp": "2026-06-21T14:03:02.654955Z",
+      "rule_name": "Task on overdue follow-ups",
+      "trigger_type": "follow_up_overdue",
+      "action_type": "create_task",
+      "target_id": "d-2002",
+      "params": {
+        "subject": "Overdue follow-up \u2014 reach out today",
+        "due_in_days": 1,
+        "trigger_detail": "Follow-up for 'Vantage \u2014 Annual renewal' is 4 day(s) overdue."
+      },
+      "decision": "proposed",
+      "result": "Dry run: proposed only, not executed."
+    },
+    {
+      "id": 5,
+      "timestamp": "2026-06-21T14:03:02.654965Z",
+      "rule_name": "Flag contacts missing key details",
+      "trigger_type": "missing_fields",
+      "action_type": "flag_for_review",
+      "target_id": "c-1001",
+      "params": {
+        "reason": "Contact record is incomplete \u2014 add the missing details.",
+        "trigger_detail": "Dana Okoro is missing: company, phone."
+      },
+      "decision": "proposed",
+      "result": "Dry run: proposed only, not executed."
+    },
+    {
+      "id": 6,
+      "timestamp": "2026-06-21T14:03:02.654975Z",
+      "rule_name": "Flag contacts missing key details",
+      "trigger_type": "missing_fields",
+      "action_type": "flag_for_review",
+      "target_id": "c-1003",
+      "params": {
+        "reason": "Contact record is incomplete \u2014 add the missing details.",
+        "trigger_detail": "Priya Nair is missing: phone."
+      },
+      "decision": "proposed",
+      "result": "Dry run: proposed only, not executed."
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0
+  }
+}
