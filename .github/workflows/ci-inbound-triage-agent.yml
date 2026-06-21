@@ -1,0 +1,31 @@
+name: inbound-triage-agent
+on:
+  push:
+    branches: [main]
+    paths: ["inbound-triage-agent/**", "lumifie-core/**", ".github/workflows/ci-inbound-triage-agent.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["inbound-triage-agent/**", "lumifie-core/**", ".github/workflows/ci-inbound-triage-agent.yml"]
+jobs:
+  test:
+    name: ruff + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          . .venv/bin/activate
+          uv pip install -e ./lumifie-core
+          uv pip install -e "./inbound-triage-agent[dev]"
+      - name: Lint (ruff)
+        run: |
+          . .venv/bin/activate
+          ruff check inbound-triage-agent
+      - name: Test (pytest)
+        run: |
+          . .venv/bin/activate
+          cd inbound-triage-agent && pytest

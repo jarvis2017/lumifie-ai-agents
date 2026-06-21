@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 from rag_chatbot.cli import run
 
 
@@ -23,6 +25,7 @@ def test_demo_command(tmp_path, capsys):
     assert "confidence" in out
 
 
-def test_ui_command_errors_gracefully_without_gradio(tmp_path):
-    # gradio is an optional extra not installed in dev/CI -> exit code 2.
+def test_ui_command_errors_gracefully_without_gradio(tmp_path, monkeypatch):
+    # Force gradio unavailable (it's an optional [ui] extra) -> graceful exit 2.
+    monkeypatch.setitem(sys.modules, "gradio", None)
     assert run(["--db", str(tmp_path / "db"), "--offline", "ui"]) == 2

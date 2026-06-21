@@ -1,10 +1,20 @@
 # lumifie-ai-agents
 
-[![CI](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci.yml)
-
 Production-grade AI agents by **Lumifie Consulting**. Each agent is a self-contained,
 tested project built on a shared foundation, runnable against multiple model
 providers (Anthropic Claude, OpenAI, local Ollama) through one abstraction.
+
+### Build status (per package)
+
+[![lumifie-core](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-lumifie-core.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-lumifie-core.yml)
+[![contract-intelligence-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-contract-intelligence-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-contract-intelligence-agent.yml)
+[![competitive-intel-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-competitive-intel-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-competitive-intel-agent.yml)
+[![lead-research-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-lead-research-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-lead-research-agent.yml)
+[![inbound-triage-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-inbound-triage-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-inbound-triage-agent.yml)
+[![rag-knowledge-chatbot](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-rag-knowledge-chatbot.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-rag-knowledge-chatbot.yml)
+[![crm-automation-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-crm-automation-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-crm-automation-agent.yml)
+[![regulatory-monitor-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-regulatory-monitor-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-regulatory-monitor-agent.yml)
+[![sales-ops-multi-agent](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-sales-ops-multi-agent.yml/badge.svg)](https://github.com/jarvis2017/lumifie-ai-agents/actions/workflows/ci-sales-ops-multi-agent.yml)
 
 ## Agents
 
@@ -17,6 +27,7 @@ providers (Anthropic Claude, OpenAI, local Ollama) through one abstraction.
 | [**rag-knowledge-chatbot**](rag-knowledge-chatbot/) | Upload documents (PDF/Word/text/URLs) and get a chatbot that answers with exact source citations and confidence scores. Incremental ingestion; demo dataset included. | `claude` (default), `gpt-4o`, `ollama/*` | **Chroma** + sentence-transformers; FastAPI + CLI + optional Gradio UI; cited answers |
 | [**crm-automation-agent**](crm-automation-agent/) | Monitors HubSpot/Airtable for triggers (new lead, stale deal, overdue follow-up, missing fields) and takes rule-based actions behind a human approval gate, with a SQLite audit trail. | `claude` (default), `gpt-4o`, `ollama/*` | YAML rules; **human approval gate**; SQLite audit; offline `--source demo` |
 | [**regulatory-monitor-agent**](regulatory-monitor-agent/) | Plans → researches → analyzes regulatory updates for a business profile, diffs against prior runs (SQLite), and emits a weekly digest of only what's new, in plain English. | `claude` (default), `gpt-4o`, `ollama/*` | 3-stage planner/researcher/analyst; run-over-run diff; cron-ready |
+| [**sales-ops-multi-agent**](sales-ops-multi-agent/) | A **LangGraph supervisor** runs the full B2B sales cycle (prospect → outreach → reply-handling → CRM sync → report) across five sub-agents, with a **human approval gate** before every external action. | `claude` (default), `gpt-4o`, `ollama/*` | Supervisor + checkpointing; CLI/Telegram approvals; dry-run; SQLite audit |
 | [**lumifie-core**](lumifie-core/) | Shared foundation every agent imports. | — | Provider abstraction, logging, retries, config, base agent |
 
 ## The shared pattern (`lumifie-core`)
@@ -50,13 +61,21 @@ Every agent is built the same way, so they're consistent and swappable:
 
 ## Quickstart
 
+This is a **uv workspace** — install the shared core and every agent into one
+virtual environment with a single command:
+
 ```bash
-# install the shared core, then an agent (each agent has its own venv)
-uv pip install -e ./lumifie-core
+uv sync --all-packages --all-extras   # one venv with core + all agents
+```
+
+Or work on a single agent in its own environment:
+
+```bash
+uv pip install -e ./lumifie-core       # shared core first
 cd contract-intelligence-agent
 uv venv --python 3.12 && uv pip install -e ".[dev]"
-cp .env.example .env   # set ANTHROPIC_API_KEY (or OPENAI_API_KEY)
-pytest                 # full pipeline runs offline
+cp .env.example .env                   # set ANTHROPIC_API_KEY (or OPENAI_API_KEY)
+pytest                                 # full pipeline runs offline
 ```
 
 ## Stack

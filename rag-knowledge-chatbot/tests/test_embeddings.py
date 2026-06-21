@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 from rag_chatbot.embeddings import HashingEmbedding, build_embedding
 
 
@@ -24,14 +26,16 @@ def test_hashing_overlap_more_similar_than_disjoint():
     assert dot_overlap > dot_disjoint
 
 
-def test_build_embedding_auto_falls_back_when_st_missing():
-    # sentence-transformers is an optional extra not installed in dev/CI, so
-    # "auto" must fall back to the hashing backend rather than raising.
+def test_build_embedding_auto_falls_back_when_st_missing(monkeypatch):
+    # With sentence-transformers unavailable, "auto" must fall back to hashing.
+    monkeypatch.setitem(sys.modules, "sentence_transformers", None)
     backend = build_embedding("auto")
     assert isinstance(backend, HashingEmbedding)
 
 
-def test_build_embedding_st_request_also_falls_back():
-    # Even an explicit request must not crash when the dependency is absent.
+def test_build_embedding_st_request_also_falls_back(monkeypatch):
+    # Force sentence-transformers to be unavailable (regardless of whether it's
+    # installed in this env) so the fallback path is exercised deterministically.
+    monkeypatch.setitem(sys.modules, "sentence_transformers", None)
     backend = build_embedding("sentence-transformers")
     assert isinstance(backend, HashingEmbedding)

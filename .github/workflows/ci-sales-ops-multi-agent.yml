@@ -1,0 +1,31 @@
+name: sales-ops-multi-agent
+on:
+  push:
+    branches: [main]
+    paths: ["sales-ops-multi-agent/**", "lumifie-core/**", ".github/workflows/ci-sales-ops-multi-agent.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["sales-ops-multi-agent/**", "lumifie-core/**", ".github/workflows/ci-sales-ops-multi-agent.yml"]
+jobs:
+  test:
+    name: ruff + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          . .venv/bin/activate
+          uv pip install -e ./lumifie-core
+          uv pip install -e "./sales-ops-multi-agent[dev]"
+      - name: Lint (ruff)
+        run: |
+          . .venv/bin/activate
+          ruff check sales-ops-multi-agent
+      - name: Test (pytest)
+        run: |
+          . .venv/bin/activate
+          cd sales-ops-multi-agent && pytest

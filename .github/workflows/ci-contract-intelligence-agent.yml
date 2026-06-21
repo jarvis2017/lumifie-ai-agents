@@ -1,0 +1,31 @@
+name: contract-intelligence-agent
+on:
+  push:
+    branches: [main]
+    paths: ["contract-intelligence-agent/**", "lumifie-core/**", ".github/workflows/ci-contract-intelligence-agent.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["contract-intelligence-agent/**", "lumifie-core/**", ".github/workflows/ci-contract-intelligence-agent.yml"]
+jobs:
+  test:
+    name: ruff + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          . .venv/bin/activate
+          uv pip install -e ./lumifie-core
+          uv pip install -e "./contract-intelligence-agent[dev]"
+      - name: Lint (ruff)
+        run: |
+          . .venv/bin/activate
+          ruff check contract-intelligence-agent
+      - name: Test (pytest)
+        run: |
+          . .venv/bin/activate
+          cd contract-intelligence-agent && pytest

@@ -1,0 +1,25 @@
+# Virtual uv workspace root for the lumifie-ai-agents monorepo.
+# One-command install of the shared core + every agent into a single .venv:
+#
+#   uv sync --all-packages --all-extras
+#
+# (Each agent also installs standalone — see its README — by installing
+#  ../lumifie-core editable first, then `uv pip install -e ".[dev]"`.)
+
+[tool.uv.workspace]
+members = [
+    "lumifie-core",
+    "contract-intelligence-agent",
+    "competitive-intel-agent",
+    "lead-research-agent",
+    "inbound-triage-agent",
+    "rag-knowledge-chatbot",
+    "crm-automation-agent",
+    "regulatory-monitor-agent",
+    "sales-ops-multi-agent",
+]
+
+# Within the workspace, every agent's `lumifie-core` dependency resolves to the
+# local member (the per-agent pyproject path source agrees with this).
+[tool.uv.sources]
+lumifie-core = { workspace = true }

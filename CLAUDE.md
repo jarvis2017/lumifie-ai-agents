@@ -96,26 +96,32 @@ agent README, so it does not follow the 10-section structure.
 
 ```
 lumifie-ai-agents/
-├── CLAUDE.md                     # this file
-├── README.md                     # portfolio index (agent table + shared pattern)
-├── .github/workflows/ci.yml      # CI: ruff + pytest across all packages on push to main
-├── lumifie-core/                 # SHARED foundation — import package `lumifie_core`
-│   └── src/lumifie_core/         #   provider (litellm), chat, agent (BaseAgent),
-│                                 #   config (CoreSettings), logging, retry
-├── contract-intelligence-agent/  # agent: PDF contract analysis
-├── competitive-intel-agent/      # agent: competitor research + run-over-run diffs
-└── docs/                         # (optional) shared cross-agent documentation
+├── CLAUDE.md                       # this file
+├── README.md                       # portfolio index (badges, agent table, pattern)
+├── pyproject.toml                  # uv WORKSPACE root (members = core + every agent)
+├── .github/workflows/ci-<pkg>.yml  # one CI workflow per package -> per-agent badges
+├── lumifie-core/                   # SHARED foundation — import package `lumifie_core`
+│   └── src/lumifie_core/           #   provider, chat, agent (BaseAgent), config,
+│                                   #   logging, retry, web (search + Jina reader)
+├── contract-intelligence-agent/    # agent: PDF contract analysis
+├── …                               # competitive / lead / inbound / rag / crm / reg
+├── sales-ops-multi-agent/          # showpiece: LangGraph supervisor (5 sub-agents)
+└── docs/                           # (optional) shared cross-agent documentation
 ```
 
-- **`lumifie-core/`** — the shared package. Directory is hyphenated
-  (`lumifie-core`); the importable Python package is `lumifie_core`. Installed
-  editable; each agent depends on it via `[tool.uv.sources]` (path).
+- **uv workspace.** The root `pyproject.toml` is a virtual workspace listing every
+  package as a member. `uv sync --all-packages --all-extras` installs everything in
+  one venv. Each agent declares `lumifie-core = { workspace = true }`.
+- **`lumifie-core/`** — the shared package. Directory is hyphenated (`lumifie-core`);
+  the importable package is `lumifie_core`. Reuse it (incl. `lumifie_core.web` for
+  search/reader) rather than re-implementing shared I/O in an agent.
 - **Each agent in its own directory**, self-contained with the standard layout:
   `src/<pkg>/`, `tests/`, `config/`, `scripts/`, `examples/`, `pyproject.toml`
   (hatchling, `[project.scripts]` CLI), `requirements.txt`, `.env.example`,
   MIT `LICENSE`, `README.md`.
-- **`.github/workflows/`** — CI. Install `lumifie-core` editable first, then each
-  agent `[dev]`, then run ruff + pytest per package.
+- **`.github/workflows/`** — one `ci-<pkg>.yml` per package (each installs
+  `lumifie-core` editable + that package `[dev]`, then runs ruff + pytest). When you
+  add an agent, add its `ci-<agent>.yml` and a badge to the root README.
 - **`docs/`** — for any shared documentation that spans agents (create when needed).
 
 ### New-agent checklist
@@ -136,7 +142,9 @@ lumifie-ai-agents/
 
 - **`lumifie-core`** — provider abstraction (litellm, multi-model, tool-use
   capability detection + JSON fallback, injectable for tests), shared logging,
-  retries, `CoreSettings`, `BaseAgent`, `chat` helpers. Tests + ruff clean.
+  retries, `CoreSettings`, `BaseAgent` (incl. `structured()`), `chat` helpers, and
+  **`lumifie_core.web`** (shared search + Jina reader backends, de-duplicated out of
+  the competitive/lead/regulatory agents). Tests + ruff clean.
 - **`contract-intelligence-agent`** — ingests a PDF contract, extracts/analyzes
   clauses (payment, termination, IP, liability, dispute resolution), flags risks,
   outputs JSON + Markdown. Multi-step tool loop; page-aware chunking; JSON fallback.
@@ -159,19 +167,27 @@ lumifie-ai-agents/
 - **`regulatory-monitor-agent`** — 3-stage planner/researcher/analyst pipeline that
   monitors regulatory updates for a business profile, **diffs run-over-run** (SQLite),
   and emits a weekly Markdown+JSON digest. Cron-ready.
+- **`sales-ops-multi-agent`** — the showpiece: a **LangGraph supervisor** routing
+  five sub-agents (Prospector, Outreach, Reply Handler, CRM Sync, Reporter) through
+  the full B2B sales cycle, with a **human approval gate** (CLI / Telegram) before
+  every external action, LangGraph checkpointing, SQLite persistence, Pydantic state,
+  YAML config, and a dry-run mode. `sales-ops run --demo --dry-run` runs offline.
 - All agent READMEs follow the 10-section standard.
 - A separate **private** repo, `lumifie-voice-agent`, is scaffolded (not built) on the
   same `lumifie_core` foundation.
-- **CI** — GitHub Actions running ruff + pytest across all packages (green); badge
-  in the root README.
+- **Monorepo tooling** — this is a **uv workspace** (root `pyproject.toml`):
+  `uv sync --all-packages --all-extras` installs everything in one venv. Each agent's
+  `lumifie-core` dep is `{ workspace = true }`; standalone per-agent installs still
+  work (install `lumifie-core` editable first).
+- **CI** — one GitHub Actions workflow **per package** (`.github/workflows/ci-<pkg>.yml`),
+  each running ruff + pytest; **per-agent status badges** in the root README.
 
 **Planned next:**
 
 - Additional agents that map to recognizable client jobs (e.g. invoice/document
   extraction, support-ticket triage, meeting-notes → CRM).
-- Optional: `uv` workspace for one-command monorepo installs; per-agent CI badges;
-  a `docs/` page describing the shared pattern in depth; move web-search/reader
-  backends into `lumifie_core` to de-duplicate across agents.
+- `SqliteSaver` checkpointer for sales-ops; real inbox/ESP adapters; a `docs/` page
+  describing the shared pattern in depth.
 
 ---
 

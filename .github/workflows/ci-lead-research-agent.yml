@@ -1,0 +1,31 @@
+name: lead-research-agent
+on:
+  push:
+    branches: [main]
+    paths: ["lead-research-agent/**", "lumifie-core/**", ".github/workflows/ci-lead-research-agent.yml"]
+  pull_request:
+    branches: [main]
+    paths: ["lead-research-agent/**", "lumifie-core/**", ".github/workflows/ci-lead-research-agent.yml"]
+jobs:
+  test:
+    name: ruff + pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install
+        run: |
+          uv venv --python 3.12
+          . .venv/bin/activate
+          uv pip install -e ./lumifie-core
+          uv pip install -e "./lead-research-agent[dev]"
+      - name: Lint (ruff)
+        run: |
+          . .venv/bin/activate
+          ruff check lead-research-agent
+      - name: Test (pytest)
+        run: |
+          . .venv/bin/activate
+          cd lead-research-agent && pytest
