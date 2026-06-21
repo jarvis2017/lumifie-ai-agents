@@ -1,8 +1,8 @@
-"""Source backends: web search and feed fetching.
+"""Source backends: web search (shared) and RSS/Atom feed fetching (local).
 
-The agent depends only on the :class:`SearchBackend` and :class:`FeedBackend`
-protocols, so the real DuckDuckGo / RSS backends can be swapped for deterministic
-fakes in tests (no network, no API keys). Both are injected into the agent.
+The web search backend is shared across the portfolio in ``lumifie_core.web``
+(re-exported here). The feed backend is specific to this agent and stays local.
+Both are injected into the agent and have deterministic fakes in tests.
 """
 
 from __future__ import annotations
@@ -11,69 +11,11 @@ from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 from lumifie_core import logger
-
-# -- web search -----------------------------------------------------------
-
-
-@dataclass(slots=True)
-class SearchResult:
-    title: str
-    url: str
-    snippet: str
-    date: str | None = None
-
-
-@runtime_checkable
-class SearchBackend(Protocol):
-    def search(
-        self, query: str, max_results: int = 5, after_date: str | None = None
-    ) -> list[SearchResult]: ...
-
-
-class DDGSearchBackend:
-    """DuckDuckGo backend (no API key). Uses the ``ddgs`` package.
-
-    When ``after_date`` (YYYY-MM-DD) is given it is appended to the query as an
-    ``after:`` constraint so results skew to recent regulatory change.
-    """
-
-    def __init__(self, region: str = "us-en", safesearch: str = "moderate") -> None:
-        self.region = region
-        self.safesearch = safesearch
-
-    def search(
-        self, query: str, max_results: int = 5, after_date: str | None = None
-    ) -> list[SearchResult]:
-        try:
-            from ddgs import DDGS  # noqa: PLC0415 - optional, lazy import
-        except ImportError as exc:  # pragma: no cover
-            raise RuntimeError(
-                "The 'ddgs' package is required for live web search. "
-                "Install with: uv pip install ddgs"
-            ) from exc
-
-        full_query = f"{query} after:{after_date}" if after_date else query
-        results: list[SearchResult] = []
-        try:
-            with DDGS() as ddgs:
-                for row in ddgs.text(
-                    full_query,
-                    region=self.region,
-                    safesearch=self.safesearch,
-                    max_results=max_results,
-                ):
-                    results.append(
-                        SearchResult(
-                            title=row.get("title", ""),
-                            url=row.get("href", "") or row.get("url", ""),
-                            snippet=row.get("body", "") or row.get("snippet", ""),
-                            date=row.get("date") or None,
-                        )
-                    )
-        except Exception as exc:  # network/ratelimit — degrade gracefully
-            logger.warning("Web search failed for '{}': {}", full_query, exc)
-        return results
-
+from lumifie_core.web import (
+    DDGSearchBackend,
+    SearchBackend,
+    SearchResult,
+)
 
 # -- feeds (RSS / Atom) ---------------------------------------------------
 

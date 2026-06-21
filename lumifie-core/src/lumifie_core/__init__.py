@@ -5,7 +5,7 @@ retry helpers, a config base, and a base agent class. Every agent in this repo
 imports from here so they share one consistent, swappable foundation.
 """
 
-from lumifie_core import chat
+from lumifie_core import chat, web
 from lumifie_core.agent import BaseAgent
 from lumifie_core.config import CoreSettings, env_float, env_int
 from lumifie_core.logging import configure_logging, logger
@@ -38,5 +38,6 @@ __all__ = [
     "model_supports_tools",
     "resolve_model",
     "retrying",
+    "web",
     "__version__",
 ]
