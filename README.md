@@ -3,7 +3,7 @@
 Production-grade AI agent projects — **Lumifie Consulting**.
 
 This repository houses AI agent development, automation pipelines, and
-client/Upwork delivery work.
+client delivery work.
 
 ## Stack
 
