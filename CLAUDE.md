@@ -150,7 +150,18 @@ lumifie-ai-agents/
   replies and routes them: **Chroma RAG** rebuttal for objections, booking link for
   interested, contact extraction for wrong-person. `python main.py --mock-email` runs
   fully offline via a built-in stub provider.
+- **`rag-knowledge-chatbot`** — document Q&A with **source citations + confidence**.
+  Chroma + sentence-transformers (offline hashing fallback), incremental ingestion,
+  FastAPI + CLI + optional Gradio UI; bundled demo dataset.
+- **`crm-automation-agent`** — monitors HubSpot/Airtable for triggers and takes
+  rule-based actions (YAML rules) behind a **human approval gate**, with a SQLite
+  audit trail. Offline `--source demo`.
+- **`regulatory-monitor-agent`** — 3-stage planner/researcher/analyst pipeline that
+  monitors regulatory updates for a business profile, **diffs run-over-run** (SQLite),
+  and emits a weekly Markdown+JSON digest. Cron-ready.
 - All agent READMEs follow the 10-section standard.
+- A separate **private** repo, `lumifie-voice-agent`, is scaffolded (not built) on the
+  same `lumifie_core` foundation.
 - **CI** — GitHub Actions running ruff + pytest across all packages (green); badge
   in the root README.
 

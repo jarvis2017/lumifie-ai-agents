@@ -1,0 +1,77 @@
+{
+  "business": {
+    "industry": "food service",
+    "location": "California, USA",
+    "operational_keywords": [
+      "food safety",
+      "labor law",
+      "minimum wage",
+      "tipped wages"
+    ]
+  },
+  "run_date": "2026-06-21",
+  "generated_at": "2026-06-21T14:02:44.264418+00:00",
+  "model": "claude-opus-4-8",
+  "lookback_days": 7,
+  "is_baseline": false,
+  "plan": {
+    "search_queries": [
+      "California fast food minimum wage update 2026",
+      "California food safety regulation restaurants new rule",
+      "California tipped wage labor law change"
+    ],
+    "source_focus": [
+      "minimum wage",
+      "food safety"
+    ],
+    "rationale": "Focus on California wage and food-safety obligations that hit a multi-site fast-casual restaurant employer most directly."
+  },
+  "new_this_week": [
+    {
+      "title": "New food-handler certification rule (30-day deadline)",
+      "url": "https://www.cdph.ca.gov/news/2026/food-handler-rule",
+      "plain_english": "CDPH now requires every food handler to complete updated certification within 30 days of hire. With three locations and regular hourly turnover, you need a tracking process so new hires are certified on time.",
+      "relevance": "high",
+      "recommended_action": "Add certification to onboarding, track completion dates per employee, and verify all current staff hold a valid certificate.",
+      "date": "2026-06-19"
+    }
+  ],
+  "full_watchlist": [
+    {
+      "title": "California fast-food minimum wage rises to $20.50/hour",
+      "url": "https://www.dir.ca.gov/news/2026/wage-order-update",
+      "plain_english": "California's Fast Food Council raised the minimum wage for covered fast-food workers to $20.50/hour. As a Bay Area fast-casual operator with ~40 hourly staff, your payroll costs will rise next quarter and you must update pay rates and posted wage notices.",
+      "relevance": "high",
+      "recommended_action": "Recalculate labor budgets at $20.50/hour, update payroll before the effective date, and post the new wage notice at each location.",
+      "date": "2026-06-16"
+    },
+    {
+      "title": "New food-handler certification rule (30-day deadline)",
+      "url": "https://www.cdph.ca.gov/news/2026/food-handler-rule",
+      "plain_english": "CDPH now requires every food handler to complete updated certification within 30 days of hire. With three locations and regular hourly turnover, you need a tracking process so new hires are certified on time.",
+      "relevance": "high",
+      "recommended_action": "Add certification to onboarding, track completion dates per employee, and verify all current staff hold a valid certificate.",
+      "date": "2026-06-19"
+    },
+    {
+      "title": "Updated wage-theft recordkeeping guidance",
+      "url": "https://www.dir.ca.gov/news/2026/wage-theft-guidance",
+      "plain_english": "DIR clarified employer recordkeeping obligations around wages and hours. You should confirm your time-tracking records meet the clarified standard.",
+      "relevance": "medium",
+      "recommended_action": "Audit time and payroll records against the updated guidance.",
+      "date": "2026-06-17"
+    }
+  ],
+  "sources_checked": [
+    "search: California fast food minimum wage update 2026",
+    "search: California food safety regulation restaurants new rule",
+    "search: California tipped wage labor law change",
+    "gov: CA Division of Labor Standards Enforcement",
+    "rss: CA Dept. of Industrial Relations \u2014 News"
+  ],
+  "token_usage": {
+    "input_tokens": 1800,
+    "output_tokens": 440,
+    "total_tokens": 2240
+  }
+}

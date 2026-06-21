@@ -27,16 +27,19 @@ jobs:
           uv pip install -e "./competitive-intel-agent[dev]"
           uv pip install -e "./lead-research-agent[dev]"
           uv pip install -e "./inbound-triage-agent[dev]"
+          uv pip install -e "./rag-knowledge-chatbot[dev]"
+          uv pip install -e "./crm-automation-agent[dev]"
+          uv pip install -e "./regulatory-monitor-agent[dev]"
 
       - name: Lint (ruff)
         run: |
           . .venv/bin/activate
-          ruff check lumifie-core contract-intelligence-agent competitive-intel-agent lead-research-agent inbound-triage-agent
+          ruff check lumifie-core contract-intelligence-agent competitive-intel-agent lead-research-agent inbound-triage-agent rag-knowledge-chatbot crm-automation-agent regulatory-monitor-agent
 
       - name: Test (pytest)
         run: |
           . .venv/bin/activate
-          for pkg in lumifie-core contract-intelligence-agent competitive-intel-agent lead-research-agent inbound-triage-agent; do
+          for pkg in lumifie-core contract-intelligence-agent competitive-intel-agent lead-research-agent inbound-triage-agent rag-knowledge-chatbot crm-automation-agent regulatory-monitor-agent; do
             echo "::group::$pkg"
             (cd "$pkg" && pytest)
             echo "::endgroup::"

@@ -1,0 +1,31 @@
+{
+  "profile": {
+    "industry": "food service",
+    "location": "California, USA",
+    "operational_keywords": [
+      "food safety",
+      "labor law",
+      "minimum wage",
+      "health inspection",
+      "tipped wages"
+    ],
+    "business_description": "A small chain of fast-casual restaurants with three locations in the San Francisco Bay Area, employing about 40 hourly staff and serving prepared food on-site and for takeout."
+  },
+  "sources": [
+    {
+      "type": "gov",
+      "value": "https://www.cdph.ca.gov/Programs/CEH/DFDCS/Pages/FDBPrograms/FoodSafetyProgram.aspx",
+      "label": "California Dept. of Public Health — Food Safety Program"
+    },
+    {
+      "type": "gov",
+      "value": "https://www.dir.ca.gov/dlse/",
+      "label": "California Division of Labor Standards Enforcement"
+    },
+    {
+      "type": "rss",
+      "value": "https://www.dir.ca.gov/DIRNews/RSSNews.xml",
+      "label": "California Dept. of Industrial Relations — News"
+    }
+  ]
+}

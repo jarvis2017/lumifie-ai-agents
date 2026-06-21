@@ -1,0 +1,11 @@
+# Third-party runtime dependencies. The shared `lumifie-core` package is a
+# monorepo path dependency — install it separately (editable) first:
+#   uv pip install -e ../lumifie-core
+# then:  uv pip install -r requirements.txt   (or: uv pip install -e ".[dev]")
+litellm>=1.80
+pydantic>=2.6
+ddgs>=6.0
+feedparser>=6.0
+httpx>=0.27
+loguru>=0.7
+tenacity>=8.2
