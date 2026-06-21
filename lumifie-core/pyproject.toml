@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lumifie-core"
+version = "0.1.0"
+description = "Shared foundation for Lumifie Consulting AI agents: provider-agnostic LLM access, logging, retries, config, and a base agent."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Lumifie Consulting", email = "joejstan@gmail.com" }]
+
+dependencies = [
+    "litellm>=1.80",
+    "pydantic>=2.6",
+    "loguru>=0.7",
+    "tenacity>=8.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lumifie_core"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["UP042"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]

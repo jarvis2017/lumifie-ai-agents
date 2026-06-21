@@ -1,6 +1,6 @@
 """Command-line entry point for the contract-intelligence agent.
 
-    contract-intelligence path/to/contract.pdf --out-dir ./reports
+    contract-intelligence path/to/contract.pdf --out-dir ./reports --model claude
 
 Produces ``<name>.report.json`` and ``<name>.report.md`` in the output directory.
 """
@@ -11,13 +11,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from loguru import logger
+from lumifie_core import LLMProvider, configure_logging, logger
+from lumifie_core.provider import missing_credential, resolve_model
 
 from contract_intelligence import __version__
 from contract_intelligence.agent import ContractIntelligenceAgent
-from contract_intelligence.config import Settings
-from contract_intelligence.llm_client import AnthropicLLMClient
-from contract_intelligence.logging_config import configure_logging
+from contract_intelligence.config import ContractSettings
 from contract_intelligence.pdf_loader import PDFLoadError, load_contract
 from contract_intelligence.report import render_json, render_markdown
 
@@ -32,33 +31,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("pdf", help="Path to the contract PDF.")
     parser.add_argument(
-        "-o",
-        "--out-dir",
-        default=".",
+        "-o", "--out-dir", default=".",
         help="Directory to write the report files into (default: current dir).",
     )
     parser.add_argument(
-        "--model",
-        default=None,
-        help="Override the Claude model id (default: from env or claude-opus-4-8).",
+        "--model", default=None,
+        help="Model alias or id: claude (default), gpt-4o, ollama/llama3.1, ... "
+        "Falls back to the LITELLM_MODEL env var.",
     )
     parser.add_argument(
-        "--effort",
-        choices=["low", "medium", "high", "max"],
-        default=None,
-        help="Reasoning effort (default: high).",
+        "--reasoning-effort", default=None, choices=["low", "medium", "high"],
+        help="Optional cross-provider reasoning effort (only sent if supported).",
     )
     parser.add_argument(
-        "--print",
-        dest="print_md",
-        action="store_true",
+        "--print", dest="print_md", action="store_true",
         help="Also print the markdown summary to stdout.",
     )
-    parser.add_argument(
-        "--log-level",
-        default=None,
-        help="Log level: DEBUG, INFO, WARNING, ERROR (default: INFO).",
-    )
+    parser.add_argument("--log-level", default=None, help="DEBUG, INFO, WARNING, ERROR.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return parser
 
@@ -66,20 +55,17 @@ def build_parser() -> argparse.ArgumentParser:
 def run(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
-    settings = Settings.from_env()
-    if args.model:
-        settings.model = args.model
-    if args.effort:
-        settings.effort = args.effort
-    if args.log_level:
-        settings.log_level = args.log_level
-
+    settings = ContractSettings.from_env(
+        model=args.model, reasoning_effort=args.reasoning_effort, log_level=args.log_level
+    )
     configure_logging(settings.log_level)
 
-    if not settings.api_key:
+    resolved = resolve_model(settings.model)
+    missing = missing_credential(resolved)
+    if missing:
         logger.error(
-            "ANTHROPIC_API_KEY is not set. Export it (or copy .env.example to "
-            ".env and fill it in) before running a live analysis."
+            "Model '{}' needs {} to be set. Export it (or copy .env.example to .env).",
+            resolved, missing,
         )
         return 2
 
@@ -89,8 +75,8 @@ def run(argv: list[str] | None = None) -> int:
         logger.error("Failed to load PDF: {}", exc)
         return 1
 
-    client = AnthropicLLMClient(api_key=settings.api_key, max_retries=settings.max_retries)
-    agent = ContractIntelligenceAgent(client, settings)
+    provider = LLMProvider.from_settings(settings)
+    agent = ContractIntelligenceAgent(provider, settings)
 
     try:
         report = agent.analyze(document)
@@ -108,17 +94,14 @@ def run(argv: list[str] | None = None) -> int:
     markdown = render_markdown(report)
     md_path.write_text(markdown, encoding="utf-8")
 
-    logger.success(
+    logger.bind(agent=agent.name).success(
         "Done. {} clause(s), {} risk(s), overall risk: {}.",
-        len(report.clauses),
-        len(report.risks),
-        report.overall_risk_level.label,
+        len(report.clauses), len(report.risks), report.overall_risk_level.label,
     )
     logger.info("Wrote {} and {}", json_path, md_path)
 
     if args.print_md:
         print("\n" + markdown)
-
     return 0
 
 

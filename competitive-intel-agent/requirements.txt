@@ -4,6 +4,6 @@
 # then:  uv pip install -r requirements.txt   (or: uv pip install -e ".[dev]")
 litellm>=1.80
 pydantic>=2.6
-pypdf>=4.2
+ddgs>=6.0
 loguru>=0.7
 tenacity>=8.2

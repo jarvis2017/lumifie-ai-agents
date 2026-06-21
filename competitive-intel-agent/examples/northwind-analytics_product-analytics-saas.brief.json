@@ -1,0 +1,115 @@
+{
+  "report": {
+    "company": "Northwind Analytics",
+    "vertical": "product analytics SaaS",
+    "generated_at": "2026-06-20T07:00:00Z",
+    "model": "claude-opus-4-8",
+    "overall_threat_level": "high",
+    "market_summary": "The product-analytics market is consolidating and shifting toward warehouse-native, AI-assisted analytics. Incumbents are bundling experimentation and session replay, raising the feature bar for mid-market challengers like Northwind.",
+    "executive_summary": "Competitive pressure has risen since the last run. PostHog has emerged as a fast-growing, open-source, all-in-one challenger, and Mixpanel has moved upmarket with enterprise pricing. Northwind's price advantage is narrowing; differentiation should pivot to warehouse-native integration and white-glove onboarding.",
+    "competitors": [
+      {
+        "name": "Amplitude",
+        "positioning": "Enterprise product analytics leader",
+        "pricing": "Usage-based; Growth tier from ~$49k/yr",
+        "strengths": [
+          "brand",
+          "depth",
+          "experimentation suite"
+        ],
+        "weaknesses": [
+          "price",
+          "complexity"
+        ],
+        "source_url": "https://amplitude.com/pricing"
+      },
+      {
+        "name": "Mixpanel",
+        "positioning": "Product analytics moving upmarket",
+        "pricing": "Free tier; Enterprise from ~$60k/yr (was ~$28/mo self-serve focus)",
+        "strengths": [
+          "self-serve",
+          "brand"
+        ],
+        "weaknesses": [
+          "pricing creep"
+        ],
+        "source_url": "https://mixpanel.com/pricing"
+      },
+      {
+        "name": "PostHog",
+        "positioning": "Open-source all-in-one product OS",
+        "pricing": "Generous free tier; usage-based paid",
+        "strengths": [
+          "open-source",
+          "all-in-one",
+          "developer love"
+        ],
+        "weaknesses": [
+          "enterprise maturity"
+        ],
+        "source_url": "https://posthog.com/pricing"
+      }
+    ],
+    "threats": [
+      {
+        "severity": "high",
+        "competitor": "PostHog",
+        "description": "PostHog's open-source, all-in-one platform (analytics + session replay + feature flags + experiments) at an aggressive free tier directly threatens Northwind's value proposition with developer-led teams.",
+        "recommendation": "Lead with warehouse-native integration and managed-service reliability; publish a migration guide and TCO comparison vs. self-hosting PostHog."
+      },
+      {
+        "severity": "medium",
+        "competitor": "Mixpanel",
+        "description": "Mixpanel's move upmarket vacates the low end but validates higher pricing, pressuring Northwind's positioning.",
+        "recommendation": "Capture displaced self-serve Mixpanel users with a focused migration offer."
+      }
+    ],
+    "sources": [
+      "https://amplitude.com/pricing",
+      "https://mixpanel.com/pricing",
+      "https://posthog.com/pricing"
+    ],
+    "token_usage": {
+      "input_tokens": 41280,
+      "output_tokens": 5120
+    }
+  },
+  "changes": [
+    {
+      "kind": "new_competitor",
+      "competitor": "PostHog",
+      "summary": "New competitor identified: PostHog.",
+      "before": null,
+      "after": "Open-source all-in-one product OS"
+    },
+    {
+      "kind": "dropped_competitor",
+      "competitor": "Heap",
+      "summary": "Heap no longer appears in the landscape.",
+      "before": "Autocapture analytics",
+      "after": null
+    },
+    {
+      "kind": "pricing_change",
+      "competitor": "Mixpanel",
+      "summary": "Mixpanel pricing changed.",
+      "before": "Free tier; Growth ~$28/mo+",
+      "after": "Free tier; Enterprise from ~$60k/yr (was ~$28/mo self-serve focus)"
+    },
+    {
+      "kind": "positioning_change",
+      "competitor": "Mixpanel",
+      "summary": "Mixpanel repositioned.",
+      "before": "Self-serve product analytics",
+      "after": "Product analytics moving upmarket"
+    },
+    {
+      "kind": "overall_threat_change",
+      "competitor": null,
+      "summary": "Overall threat moved from Medium to High.",
+      "before": "Medium",
+      "after": "High"
+    }
+  ]
+}

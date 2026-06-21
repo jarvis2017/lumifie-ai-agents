@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from loguru import logger
+from lumifie_core import logger
 from pypdf import PdfReader
 
 

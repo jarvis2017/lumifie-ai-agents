@@ -1,106 +1,86 @@
-"""Shared test fixtures, including a scripted (no-network) LLM client.
+"""Shared fixtures, including fake providers (no network, no API keys).
 
-The scripted client implements the same ``create(**kwargs)`` surface as the real
-:class:`AnthropicLLMClient`, so the agent runs end-to-end in tests with no API
-key and no network — exercising chunking, the tool loop, finalization, and report
-rendering exactly as the live path does.
+These fakes implement the same surface the agent uses from ``LLMProvider``
+(``model``, ``supports_tools``, ``complete(...) -> CompletionResult``), so the
+whole pipeline runs in tests exactly as the live path does — for both the native
+tool-use path and the JSON-mode fallback.
 """
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from lumifie_core import CompletionResult, ToolCall
 
-from contract_intelligence.config import Settings
+from contract_intelligence.config import ContractSettings
 
-
-def _block(**kw: Any) -> SimpleNamespace:
-    return SimpleNamespace(**kw)
-
-
-def _usage() -> SimpleNamespace:
-    return _block(
-        input_tokens=120,
-        output_tokens=60,
-        cache_read_input_tokens=0,
-        cache_creation_input_tokens=0,
-    )
+_USAGE = {"input_tokens": 120, "output_tokens": 60, "total_tokens": 180}
 
 
-def _response(content: list[SimpleNamespace], stop_reason: str) -> SimpleNamespace:
-    return _block(content=content, stop_reason=stop_reason, usage=_usage())
+class FakeToolProvider:
+    """A provider that supports tools and scripts a clause+risk per chunk."""
 
+    supports_tools = True
 
-class ScriptedLLMClient:
-    """A deterministic stand-in for the Anthropic client.
-
-    It reacts to the last user message the agent sends:
-
-    * a chunk instruction (string)  -> returns record_clause + flag_risk calls
-    * a tool_result follow-up (list) -> returns an empty end_turn (section done)
-    * the finalize instruction       -> returns a finalize_analysis call
-    """
-
-    def __init__(self) -> None:
+    def __init__(self, model: str = "claude-opus-4-8") -> None:
+        self.model = model
         self.calls = 0
         self._uid = 0
 
-    def _next_id(self) -> str:
+    def _id(self) -> str:
         self._uid += 1
-        return f"toolu_{self._uid}"
+        return f"call_{self._uid}"
 
-    def create(self, **kwargs: Any) -> SimpleNamespace:
+    def complete(self, messages: list[dict[str, Any]], **kwargs: Any) -> CompletionResult:
         self.calls += 1
-        last = kwargs["messages"][-1]
+        last = messages[-1]
+
+        # Follow-up turn carrying tool results -> section complete.
+        if last["role"] == "tool":
+            return CompletionResult(text="Section complete.", finish_reason="stop", usage=_USAGE)
+
         content = last["content"]
-
-        # Follow-up turn carrying tool_result blocks -> section complete.
-        if isinstance(content, list):
-            return _response([_block(type="text", text="Section complete.")], "end_turn")
-
-        # Final pass.
         if "finalize_analysis exactly once" in content:
-            return _response(
-                [
-                    _block(
-                        type="tool_use",
-                        id=self._next_id(),
+            return CompletionResult(
+                text=None,
+                tool_calls=[
+                    ToolCall(
+                        id=self._id(),
                         name="finalize_analysis",
-                        input={
+                        arguments={
                             "overall_risk_level": "high",
                             "executive_summary": (
-                                "Vendor-favorable MSA with unlimited client indemnity "
-                                "and unilateral termination. Negotiate before signing."
+                                "Vendor-favorable MSA with uncapped client indemnity and "
+                                "unilateral termination. Negotiate before signing."
                             ),
                         },
                     )
                 ],
-                "tool_use",
+                finish_reason="tool_calls",
+                usage=_USAGE,
             )
 
-        # A contract section -> extract one clause and one risk.
-        return _response(
-            [
-                _block(
-                    type="tool_use",
-                    id=self._next_id(),
+        return CompletionResult(
+            text=None,
+            tool_calls=[
+                ToolCall(
+                    id=self._id(),
                     name="record_clause",
-                    input={
+                    arguments={
                         "category": "payment_terms",
                         "title": "Payment due within 15 days",
-                        "summary": "Invoices are due within fifteen days of issue.",
+                        "summary": "Invoices are due within fifteen days.",
                         "verbatim_excerpt": "due and payable within fifteen (15) days",
                         "page": 1,
                     },
                 ),
-                _block(
-                    type="tool_use",
-                    id=self._next_id(),
+                ToolCall(
+                    id=self._id(),
                     name="flag_risk",
-                    input={
+                    arguments={
                         "severity": "high",
                         "category": "liability",
                         "title": "Uncapped client indemnification",
@@ -110,23 +90,68 @@ class ScriptedLLMClient:
                     },
                 ),
             ],
-            "tool_use",
+            finish_reason="tool_calls",
+            usage=_USAGE,
         )
 
 
-@pytest.fixture
-def scripted_client() -> ScriptedLLMClient:
-    return ScriptedLLMClient()
+class FakeJSONProvider:
+    """A provider without tool support; returns JSON per the fallback path."""
+
+    supports_tools = False
+
+    def __init__(self, model: str = "ollama/llama3.1") -> None:
+        self.model = model
+        self.calls = 0
+
+    def complete(self, messages: list[dict[str, Any]], **kwargs: Any) -> CompletionResult:
+        self.calls += 1
+        content = messages[-1]["content"]
+        if '"clauses"' in content:  # per-chunk extraction
+            payload = {
+                "clauses": [
+                    {
+                        "category": "termination",
+                        "title": "Auto-renewal",
+                        "summary": "Renews annually unless 90 days notice.",
+                        "verbatim_excerpt": "automatically renew",
+                        "page": 2,
+                    }
+                ],
+                "risks": [
+                    {
+                        "severity": "medium",
+                        "category": "termination",
+                        "title": "Auto-renewal trap",
+                        "description": "Easy to miss the 90-day window.",
+                        "recommendation": "Set a renewal reminder.",
+                        "related_excerpt": "automatically renew",
+                    }
+                ],
+            }
+        else:  # finalize
+            payload = {
+                "overall_risk_level": "medium",
+                "executive_summary": "Standard MSA with manageable risks.",
+            }
+        return CompletionResult(text=json.dumps(payload), finish_reason="stop", usage=_USAGE)
 
 
 @pytest.fixture
-def settings() -> Settings:
-    # Small chunk size forces multiple chunks from the sample PDF, exercising the
-    # multi-step loop.
-    return Settings(
-        api_key="test-key",
+def tool_provider() -> FakeToolProvider:
+    return FakeToolProvider()
+
+
+@pytest.fixture
+def json_provider() -> FakeJSONProvider:
+    return FakeJSONProvider()
+
+
+@pytest.fixture
+def settings() -> ContractSettings:
+    # Small chunk size forces multiple chunks, exercising the multi-step loop.
+    return ContractSettings(
         model="claude-opus-4-8",
-        effort="high",
         max_tokens=2000,
         max_chunk_chars=900,
         max_iterations_per_chunk=6,
@@ -135,7 +160,6 @@ def settings() -> Settings:
 
 @pytest.fixture(scope="session")
 def sample_pdf(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """Generate the multi-page sample contract PDF once per test session."""
     pytest.importorskip("reportlab", reason="reportlab is needed to build the PDF fixture")
     from scripts.make_sample_pdf import build_pdf  # noqa: PLC0415
 

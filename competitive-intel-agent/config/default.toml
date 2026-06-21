@@ -1,0 +1,20 @@
+# Reference configuration for the Competitive Intelligence Agent.
+# Runtime values resolve from environment variables (see .env.example); this file
+# documents the defaults.
+
+[model]
+id = "claude"        # alias -> claude-opus-4-8; also gpt-4o, ollama/llama3.1
+max_tokens = 8000
+
+[research]
+region = "us-en"
+max_searches = 8
+max_competitors = 8
+max_iterations = 14
+results_per_search = 5
+
+[storage]
+db_path = "competitive_intel.db"   # SQLite run history powering run-over-run diffs
+
+[scope]
+threat_levels = ["low", "medium", "high", "critical"]
