@@ -38,6 +38,33 @@ class BaseAgent(ABC):
             self.token_usage[key] += int(result.usage.get(key, 0))
         return result
 
+    def structured(
+        self, *, system: str, prompt: str, schema: dict[str, Any], tool_name: str
+    ) -> dict[str, Any]:
+        """Get one structured (JSON object) result, validated by the caller.
+
+        Uses native tool use when the provider supports it (forcing a single tool
+        call), otherwise falls back to JSON mode — so the same call works across
+        Claude, GPT-4o, and Ollama. Returns a plain dict ({} on parse failure).
+        """
+        from lumifie_core import chat  # local import avoids import-order coupling
+
+        messages = [chat.system(system), chat.user(prompt)]
+        if self.provider.supports_tools:
+            tool = chat.function_tool(
+                tool_name, f"Return the {tool_name} as structured data.", schema
+            )
+            result = self.complete(
+                messages,
+                tools=[tool],
+                tool_choice={"type": "function", "function": {"name": tool_name}},
+            )
+            if result.tool_calls:
+                return result.tool_calls[0].arguments
+            return chat.parse_json(result.text)
+        result = self.complete(messages, response_format={"type": "json_object"})
+        return chat.parse_json(result.text)
+
     @abstractmethod
     def run(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the agent's task. Implemented by each agent."""

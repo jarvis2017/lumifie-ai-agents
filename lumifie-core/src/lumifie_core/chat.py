@@ -12,6 +12,17 @@ from typing import Any
 from lumifie_core.provider import CompletionResult
 
 
+def parse_json(text: str | None) -> dict[str, Any]:
+    """Best-effort parse of a JSON object from model text; {} on failure."""
+    if not text:
+        return {}
+    try:
+        data = json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
 def system(content: str) -> dict[str, Any]:
     return {"role": "system", "content": content}
 
@@ -51,4 +62,11 @@ def tool_result(tool_call_id: str, content: str) -> dict[str, Any]:
     return {"role": "tool", "tool_call_id": tool_call_id, "content": content}
 
 
-__all__ = ["system", "user", "function_tool", "assistant_message", "tool_result"]
+__all__ = [
+    "system",
+    "user",
+    "function_tool",
+    "assistant_message",
+    "tool_result",
+    "parse_json",
+]
