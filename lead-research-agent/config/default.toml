@@ -1,0 +1,21 @@
+# Reference configuration for the Lead Research Agent.
+# Runtime values resolve from environment variables (see .env.example).
+
+[model]
+id = "claude"        # alias -> claude-opus-4-8; also gpt-4o, ollama/llama3.1
+max_tokens = 8000
+
+[research]
+region = "us-en"
+max_searches = 4
+results_per_search = 4
+jina_base = "https://r.jina.ai"
+max_page_chars = 6000
+
+[icp]
+# Path to a JSON ICP file; unset uses the built-in default. See config/icp.example.json.
+path = ""
+
+[orchestration]
+framework = "langgraph"
+pipeline = ["scrape", "match", "copywrite"]

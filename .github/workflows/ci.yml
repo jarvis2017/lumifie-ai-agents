@@ -25,16 +25,17 @@ jobs:
           uv pip install -e ./lumifie-core
           uv pip install -e "./contract-intelligence-agent[dev]"
           uv pip install -e "./competitive-intel-agent[dev]"
+          uv pip install -e "./lead-research-agent[dev]"
 
       - name: Lint (ruff)
         run: |
           . .venv/bin/activate
-          ruff check lumifie-core contract-intelligence-agent competitive-intel-agent
+          ruff check lumifie-core contract-intelligence-agent competitive-intel-agent lead-research-agent
 
       - name: Test (pytest)
         run: |
           . .venv/bin/activate
-          for pkg in lumifie-core contract-intelligence-agent competitive-intel-agent; do
+          for pkg in lumifie-core contract-intelligence-agent competitive-intel-agent lead-research-agent; do
             echo "::group::$pkg"
             (cd "$pkg" && pytest)
             echo "::endgroup::"

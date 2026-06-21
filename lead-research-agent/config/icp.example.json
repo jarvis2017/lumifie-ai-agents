@@ -1,0 +1,17 @@
+{
+  "name": "B2B SaaS — mid-market",
+  "target_industries": ["SaaS", "B2B software", "fintech", "developer tools"],
+  "company_sizes": ["50-200 employees", "200-1000 employees"],
+  "target_personas": ["VP Engineering", "Head of Product", "CTO", "VP Marketing"],
+  "pain_points": [
+    "manual, repetitive workflows",
+    "slow time-to-insight",
+    "tooling that does not scale with headcount"
+  ],
+  "disqualifiers": ["pre-revenue", "fewer than 10 employees", "consumer-only"],
+  "value_props_to_emphasize": [
+    "fast time-to-value",
+    "automation of repetitive work",
+    "integrates with existing stack"
+  ]
+}
