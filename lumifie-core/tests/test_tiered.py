@@ -77,3 +77,42 @@ def test_openrouter_missing_credential(monkeypatch):
     assert missing_credential("openrouter/google/gemini-2.0-flash-exp:free") == "OPENROUTER_API_KEY"
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     assert missing_credential("openrouter/google/gemini-2.0-flash-exp:free") is None
+
+
+def test_nvidia_override_routes_quality_to_kimi(monkeypatch):
+    from lumifie_core.tiered import NVIDIA_BUILD_BASE, NVIDIA_QUALITY_MODEL
+
+    monkeypatch.setenv("NVIDIA_BUILD_API", "nv-secret")
+    llm = TieredLLM(quality_model="claude-opus-4-8", fast=_FakeProvider("fast"))
+    assert llm.quality.model == NVIDIA_QUALITY_MODEL
+    assert llm.quality.api_base == NVIDIA_BUILD_BASE
+    assert llm.quality.api_key == "nv-secret"
+
+
+def test_no_nvidia_override_uses_default_quality(monkeypatch):
+    monkeypatch.delenv("NVIDIA_BUILD_API", raising=False)
+    llm = TieredLLM(quality_model="claude-opus-4-8", fast=_FakeProvider("fast"))
+    assert llm.quality.model == "claude-opus-4-8"
+    assert llm.quality.api_base is None
+
+
+def test_api_base_and_key_forwarded_to_completion():
+    from lumifie_core.provider import LLMProvider
+
+    seen: dict[str, Any] = {}
+
+    def fake_completion(**kwargs):
+        seen.update(kwargs)
+
+        class _R:
+            choices = [type("C", (), {"message": type("M", (), {"content": "ok", "tool_calls": []}),
+                                      "finish_reason": "stop"})]
+            usage = type("U", (), {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2})
+
+        return _R()
+
+    p = LLMProvider("openai/moonshotai/kimi-k2.6", api_base="https://x/v1", api_key="k",
+                    completion_fn=fake_completion)
+    p.complete([{"role": "user", "content": "hi"}])
+    assert seen["api_base"] == "https://x/v1"
+    assert seen["api_key"] == "k"

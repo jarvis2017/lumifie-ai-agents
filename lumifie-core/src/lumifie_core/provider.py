@@ -127,6 +127,8 @@ class LLMProvider:
         reasoning_effort: str | None = None,
         max_retries: int = 4,
         request_timeout: int = 600,
+        api_base: str | None = None,
+        api_key: str | None = None,
         completion_fn: Callable[..., Any] | None = None,
     ) -> None:
         self.model = resolve_model(model)
@@ -135,6 +137,10 @@ class LLMProvider:
         self.temperature = temperature
         self.reasoning_effort = reasoning_effort
         self.request_timeout = request_timeout
+        # Optional overrides for OpenAI-compatible endpoints (e.g. Nvidia Build,
+        # local gateways). When set, they are forwarded to litellm per call.
+        self.api_base = api_base
+        self.api_key = api_key
         self._completion = completion_fn or litellm.completion
         self._max_retries = max_retries
 
@@ -184,6 +190,10 @@ class LLMProvider:
             kwargs["temperature"] = self.temperature
         if self.reasoning_effort is not None:
             kwargs["reasoning_effort"] = self.reasoning_effort
+        if self.api_base is not None:
+            kwargs["api_base"] = self.api_base
+        if self.api_key is not None:
+            kwargs["api_key"] = self.api_key
         if tools and self.supports_tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = tool_choice or "auto"

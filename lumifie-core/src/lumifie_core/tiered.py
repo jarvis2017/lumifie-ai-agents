@@ -16,16 +16,31 @@ from __future__ import annotations
 import os
 from typing import Any
 
+from lumifie_core.logging import logger
 from lumifie_core.provider import CompletionResult, LLMProvider
 
 QUALITY_DEFAULT = "claude-opus-4-8"
 FAST_DEFAULT = "openrouter/google/gemini-2.0-flash-exp:free"
+
+# Nvidia Build (OpenAI-compatible) hosting Moonshot's Kimi k2.6. When the
+# NVIDIA_BUILD_API env var is set, the quality tier routes here instead of Claude.
+NVIDIA_BUILD_BASE = "https://integrate.api.nvidia.com/v1"
+NVIDIA_QUALITY_MODEL = "openai/moonshotai/kimi-k2.6"
 
 _TIERS = ("quality", "fast")
 
 
 def _empty_usage() -> dict[str, int]:
     return {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+
+
+def nvidia_quality_override() -> tuple[str, str, str] | None:
+    """If ``NVIDIA_BUILD_API`` is set, return (model, api_base, api_key) for the
+    quality tier (Nvidia Build serving Kimi k2.6); otherwise ``None``."""
+    key = os.getenv("NVIDIA_BUILD_API")
+    if not key:
+        return None
+    return (NVIDIA_QUALITY_MODEL, NVIDIA_BUILD_BASE, key)
 
 
 class TieredLLM:
@@ -42,10 +57,8 @@ class TieredLLM:
         quality: LLMProvider | None = None,
         fast: LLMProvider | None = None,
     ) -> None:
-        self.quality = quality or LLMProvider(
-            quality_model or QUALITY_DEFAULT,
-            max_tokens=max_tokens,
-            max_retries=max_retries,
+        self.quality = quality or self._build_quality(
+            quality_model, max_tokens=max_tokens, max_retries=max_retries,
             request_timeout=request_timeout,
         )
         self.fast = fast or LLMProvider(
@@ -55,6 +68,25 @@ class TieredLLM:
             request_timeout=request_timeout,
         )
         self.usage: dict[str, dict[str, int]] = {"quality": _empty_usage(), "fast": _empty_usage()}
+
+    @staticmethod
+    def _build_quality(
+        quality_model: str | None, *, max_tokens: int, max_retries: int, request_timeout: int
+    ) -> LLMProvider:
+        """Build the quality provider, auto-routing to Nvidia Build (Kimi k2.6)
+        when ``NVIDIA_BUILD_API`` is set."""
+        override = nvidia_quality_override()
+        if override:
+            model, api_base, api_key = override
+            logger.info("Quality tier -> Nvidia Build ({}).", model)
+            return LLMProvider(
+                model, api_base=api_base, api_key=api_key, max_tokens=max_tokens,
+                max_retries=max_retries, request_timeout=request_timeout,
+            )
+        return LLMProvider(
+            quality_model or QUALITY_DEFAULT, max_tokens=max_tokens,
+            max_retries=max_retries, request_timeout=request_timeout,
+        )
 
     @classmethod
     def from_env(cls, *, max_tokens: int = 4096) -> TieredLLM:
@@ -116,4 +148,11 @@ class TieredLLM:
         return out
 
 
-__all__ = ["TieredLLM", "QUALITY_DEFAULT", "FAST_DEFAULT"]
+__all__ = [
+    "TieredLLM",
+    "QUALITY_DEFAULT",
+    "FAST_DEFAULT",
+    "nvidia_quality_override",
+    "NVIDIA_BUILD_BASE",
+    "NVIDIA_QUALITY_MODEL",
+]
