@@ -33,6 +33,12 @@ MODEL_ALIASES: dict[str, str] = {
     "claude-opus": "claude-opus-4-8",
     "gpt-4o": "gpt-4o",
     "gpt4o": "gpt-4o",
+    # OpenRouter free models (for the "fast" tier). litellm routes openrouter/*
+    # via OPENROUTER_API_KEY.
+    "fast": "openrouter/google/gemini-2.0-flash-exp:free",
+    "openrouter-free": "openrouter/google/gemini-2.0-flash-exp:free",
+    "gemini-flash-free": "openrouter/google/gemini-2.0-flash-exp:free",
+    "llama-free": "openrouter/meta-llama/llama-3.1-8b-instruct:free",
 }
 
 # Transient litellm errors worth retrying.
@@ -65,6 +71,8 @@ def missing_credential(model: str) -> str | None:
 
     if model.startswith(("ollama/", "ollama_chat/")):
         return None
+    if model.startswith("openrouter/"):
+        return None if os.getenv("OPENROUTER_API_KEY") else "OPENROUTER_API_KEY"
     if model.startswith(("claude", "anthropic/")):
         return None if os.getenv("ANTHROPIC_API_KEY") else "ANTHROPIC_API_KEY"
     if model.startswith(("gpt", "openai/", "o1", "o3")):

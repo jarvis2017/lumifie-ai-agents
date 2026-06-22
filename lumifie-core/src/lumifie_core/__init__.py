@@ -19,6 +19,7 @@ from lumifie_core.provider import (
     resolve_model,
 )
 from lumifie_core.retry import retrying
+from lumifie_core.tiered import TieredLLM
 
 __version__ = "0.1.0"
 
@@ -39,5 +40,6 @@ __all__ = [
     "resolve_model",
     "retrying",
     "web",
+    "TieredLLM",
     "__version__",
 ]
