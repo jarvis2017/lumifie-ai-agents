@@ -7,6 +7,7 @@ imports from here so they share one consistent, swappable foundation.
 
 from lumifie_core import chat, web
 from lumifie_core.agent import BaseAgent
+from lumifie_core.airtable import AirtableClient, build_outreach_fields
 from lumifie_core.config import CoreSettings, env_float, env_int
 from lumifie_core.logging import configure_logging, logger
 from lumifie_core.provider import (
@@ -24,6 +25,7 @@ from lumifie_core.tiered import TieredLLM
 __version__ = "0.1.0"
 
 __all__ = [
+    "AirtableClient",
     "BaseAgent",
     "CompletionResult",
     "CoreSettings",
@@ -41,5 +43,6 @@ __all__ = [
     "retrying",
     "web",
     "TieredLLM",
+    "build_outreach_fields",
     "__version__",
 ]
