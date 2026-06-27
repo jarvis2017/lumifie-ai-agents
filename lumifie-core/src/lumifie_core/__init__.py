@@ -19,6 +19,7 @@ from lumifie_core.provider import (
     model_supports_tools,
     resolve_model,
 )
+from lumifie_core.research_filters import is_content_title
 from lumifie_core.retry import retrying
 from lumifie_core.tiered import TieredLLM
 
@@ -36,6 +37,7 @@ __all__ = [
     "configure_logging",
     "env_float",
     "env_int",
+    "is_content_title",
     "logger",
     "missing_credential",
     "model_supports_tools",
