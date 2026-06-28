@@ -22,10 +22,13 @@ from lumifie_core.provider import CompletionResult, LLMProvider
 QUALITY_DEFAULT = "claude-opus-4-8"
 FAST_DEFAULT = "openrouter/google/gemini-2.0-flash-exp:free"
 
-# Nvidia Build (OpenAI-compatible) hosting Moonshot's Kimi k2.6. When the
+# Nvidia Build (OpenAI-compatible) hosting Meta's Llama 3.3 70B Instruct. When the
 # NVIDIA_BUILD_API env var is set, the quality tier routes here instead of Claude.
+# NOTE: do NOT use Chinese-origin models here (Kimi/DeepSeek/Qwen) — they leak CJK
+# characters and control tokens on English business content (moonshotai/kimi-k2.6 was
+# confirmed broken 2026-06-28). Llama 3.3 70B is English-native and emits clean output.
 NVIDIA_BUILD_BASE = "https://integrate.api.nvidia.com/v1"
-NVIDIA_QUALITY_MODEL = "openai/moonshotai/kimi-k2.6"
+NVIDIA_QUALITY_MODEL = "openai/meta/llama-3.3-70b-instruct"
 
 _TIERS = ("quality", "fast")
 
@@ -36,7 +39,7 @@ def _empty_usage() -> dict[str, int]:
 
 def nvidia_quality_override() -> tuple[str, str, str] | None:
     """If ``NVIDIA_BUILD_API`` is set, return (model, api_base, api_key) for the
-    quality tier (Nvidia Build serving Kimi k2.6); otherwise ``None``."""
+    quality tier (Nvidia Build serving Llama 3.3 70B); otherwise ``None``."""
     key = os.getenv("NVIDIA_BUILD_API")
     if not key:
         return None
@@ -73,7 +76,7 @@ class TieredLLM:
     def _build_quality(
         quality_model: str | None, *, max_tokens: int, max_retries: int, request_timeout: int
     ) -> LLMProvider:
-        """Build the quality provider, auto-routing to Nvidia Build (Kimi k2.6)
+        """Build the quality provider, auto-routing to Nvidia Build (Llama 3.3 70B)
         when ``NVIDIA_BUILD_API`` is set."""
         override = nvidia_quality_override()
         if override:
